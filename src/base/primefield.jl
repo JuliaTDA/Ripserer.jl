@@ -41,7 +41,7 @@ mod_prime(i, ::Val{2}) = i & 1
 """
     Mod{M} <: Integer
 
-`Mod{M}` is the default field used by Ripserer. It is a representation of a finite field
+`Mod{M}` is the default field used by TDARipserer. It is a representation of a finite field
 ``\\mathbb{Z}_M``, integers modulo small, prime `M`. Supports field arithmetic and can be
 converted to integer with `Int`.
 

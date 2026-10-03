@@ -1,4 +1,4 @@
-using Ripserer
+using TDARipserer
 using Test
 
 include("../testdatasets.jl")
@@ -17,12 +17,12 @@ include("interfacetest.jl")
                 res_col2 = ripserer(col2; modulus=m, dim_max=2)
                 res_col3 = ripserer(col3; modulus=m, dim_max=2)
 
-                ne_rips = length(Ripserer.edges(rips))
-                ne_col1 = length(Ripserer.edges(col1))
-                ne_col2 = length(Ripserer.edges(col2))
-                ne_col3 = length(Ripserer.edges(col3))
+                ne_rips = length(TDARipserer.edges(rips))
+                ne_col1 = length(TDARipserer.edges(col1))
+                ne_col2 = length(TDARipserer.edges(col2))
+                ne_col3 = length(TDARipserer.edges(col3))
 
-                @test Ripserer.simplex_type(col3, 2) == Simplex{2,eltype(rips.adj),Int32}
+                @test TDARipserer.simplex_type(col3, 2) == Simplex{2,eltype(rips.adj),Int32}
 
                 @test ne_rips > ne_col1
                 @test ne_col1 == ne_col2 == ne_col3

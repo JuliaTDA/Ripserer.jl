@@ -1,10 +1,10 @@
 using Distances
 using LinearAlgebra
-using Ripserer
+using TDARipserer
 using StaticArrays
 using Test
 
-using Ripserer:
+using TDARipserer:
     _landmarks_and_radius,
     _to_integer_coefficients,
     _zero_coboundary_matrix,
@@ -136,7 +136,7 @@ end
         cc = CircularCoordinates(circle, 1:10:100)
         transformed1 = cc(circle, 1)
         transformed1 .-= transformed1[1]
-        transformed1 .= Ripserer._mod_z.(transformed1)
+        transformed1 .= TDARipserer._mod_z.(transformed1)
 
         @test transformed1 ≈ ts1 atol = 0.05
 
@@ -146,7 +146,7 @@ end
         new_points = [(sinpi(2t), cospi(2t)) for t in ts2]
         transformed2 = cc(new_points, 1)
         transformed2 .-= transformed2[1]
-        transformed2 .= Ripserer._mod_z.(transformed2)
+        transformed2 .= TDARipserer._mod_z.(transformed2)
 
         @test transformed2 ≈ ts2 atol = 0.05
     end

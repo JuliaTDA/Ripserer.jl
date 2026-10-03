@@ -179,7 +179,7 @@ Comes with a default implementation.
 ```jldoctest coboundary
 filtration = Rips([0 1 1 1; 1 0 1 1; 1 1 0 1; 1 1 1 0])
 
-for c in Ripserer.coboundary(filtration, Simplex{1}(2, 1))
+for c in TDARipserer.coboundary(filtration, Simplex{1}(2, 1))
     println(c)
 end
 
@@ -190,7 +190,7 @@ end
 ```
 
 ```jldoctest coboundary
-for c in Ripserer.coboundary(filtration, Simplex{1}(2, 1), Val(false))
+for c in TDARipserer.coboundary(filtration, Simplex{1}(2, 1), Val(false))
     println(c)
 end
 
@@ -219,7 +219,7 @@ Comes with a default implementation.
 ```jldoctest boundary
 filtration = Rips([0 1 1 1; 1 0 1 1; 1 1 0 1; 1 1 1 0])
 
-for f in Ripserer.boundary(filtration, Simplex{2}(2, 1))
+for f in TDARipserer.boundary(filtration, Simplex{2}(2, 1))
     println(f)
 end
 

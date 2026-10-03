@@ -1,8 +1,8 @@
 using Test
-using Ripserer
+using TDARipserer
 using Suppressor
 
-const R = Ripserer
+const R = TDARipserer
 
 function test_filtration(F, args...; test_verbose=true, flt_kwargs=(), kwargs...)
     if !isempty(kwargs)

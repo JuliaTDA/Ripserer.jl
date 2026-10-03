@@ -1,13 +1,13 @@
 using Compat
 using Distances
-using Ripserer
+using TDARipserer
 using SparseArrays
 using Random
 using StaticArrays
 using Suppressor
 using Test
 
-using Ripserer:
+using TDARipserer:
     distances, births, adjacency_matrix, edges, nv, unsafe_simplex, ChainElement, Chain
 
 include("../testdatasets.jl")
@@ -194,7 +194,7 @@ end
 
                 # Add zeros to diagonal. Adding ones first actually changes the structure of
                 # the matrix.
-                data2 = sparse(Ripserer.distances(data))
+                data2 = sparse(TDARipserer.distances(data))
                 for i in axes(data2, 1)
                     data2[i, i] = 1
                     data2[i, i] = 0

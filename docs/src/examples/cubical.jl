@@ -3,7 +3,7 @@
 # In this example, we will demonstrate computing sublevel set persistent homology of time
 # series and image data. We will need the following packages.
 
-using Ripserer
+using TDARipserer
 using Images
 using Plots
 gr() # hide
@@ -21,7 +21,7 @@ curve_plot = plot(curve; legend=false, title="Curve")
 
 # The other will be [the Event Horizon Telescope picture of a black
 # hole](https://en.wikipedia.org/wiki/File:Black_hole_-_Messier_87_crop_max_res.jpg). We
-# will use a small, 240×240 pixel version of the image. Ripserer should have no problems
+# will use a small, 240×240 pixel version of the image. TDARipserer should have no problems
 # with processing larger images, but this will work well enough for this tutorial.
 
 blackhole_image = load(
@@ -29,7 +29,7 @@ blackhole_image = load(
 )
 blackhole_plot = plot(blackhole_image; title="Black Hole")
 
-# To use the image with Ripserer, we have to convert it to grayscale.
+# To use the image with TDARipserer, we have to convert it to grayscale.
 
 blackhole = Gray.(blackhole_image)
 nothing # hide
@@ -38,7 +38,7 @@ nothing # hide
 
 # Sublevel set persistent homology provides a stable description of the critical points of a
 # function. The zeroth persistent homology group ``H_0`` corresponds to its local minima. To
-# compute this with Ripserer, we use cubical persistent homology. Note that there is no
+# compute this with TDARipserer, we use cubical persistent homology. Note that there is no
 # information in ``H_1``, since the function is one-dimensional, so we only grab the first
 # part of the result.
 
@@ -180,7 +180,7 @@ plt = plot(blackhole_image; title="Black Hole")
 plot!(plt, only(result[2]), blackhole; label="H₁ cocycle", color=1)
 
 # Notice that the result is not a cycle, but rather a collection of pixels that
-# would destroy the cycle if removed. The reason is that Ripserer computes persistent
+# would destroy the cycle if removed. The reason is that TDARipserer computes persistent
 # _co_homology by default. The persistence diagrams of persistent homology and persistent
 # cohomology are the same, but persistent cohomology is much more efficient to compute. The
 # representatives it finds, however, tend to not be as informative. Keep this in mind when
@@ -189,7 +189,7 @@ plot!(plt, only(result[2]), blackhole; label="H₁ cocycle", color=1)
 # We compute persistent homology with the argument `alg=:homology`.
 
 # !!! warning "Infinite Intervals in Persistent Homology"
-#     Ripserer currently can't compute infinite intervals in dimensions
+#     TDARipserer currently can't compute infinite intervals in dimensions
 #     higher than zero with persistent homology.
 
 result = ripserer(Cubical(-blackhole); cutoff=0.1, reps=true, alg=:homology)

@@ -1,11 +1,11 @@
 using Random
-using Ripserer
+using TDARipserer
 using Test
 
-using Ripserer: chain_element_type, coefficient, index
+using TDARipserer: chain_element_type, coefficient, index
 
-using Ripserer: ReducedMatrix, record!, commit!, clear_buffer!
-using Ripserer: WorkingChain, nonheap_push!, repair!
+using TDARipserer: ReducedMatrix, record!, commit!, clear_buffer!
+using TDARipserer: WorkingChain, nonheap_push!, repair!
 
 cofacet_type(::Type{<:A}) where {D,T,I,A<:Simplex{D,T,I}} = Simplex{D + 1,T,I}
 facet_type(::Type{<:A}) where {D,T,I,A<:Simplex{D,T,I}} = Simplex{D - 1,T,I}

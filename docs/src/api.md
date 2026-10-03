@@ -1,6 +1,6 @@
 # API
 
-## Ripserer
+## TDARipserer
 
 ```@docs
 ripserer
@@ -31,33 +31,33 @@ EdgeCollapsedRips
 ## Persistence Diagrams
 
 Persistence diagrams live in a separate package,
-[PersistenceDiagrams.jl](https://github.com/mtsch/PersistenceDiagrams.jl). The package is
+[TDAPersistenceDiagrams.jl](https://github.com/mtsch/PersistenceDiagrams.jl). The package is
 documented in detail [here](https://mtsch.github.io/PersistenceDiagrams.jl/dev/).
 
 If you are looking for
 Wasserstein or bottleneck distances, persistence images, betti curves, landscapes, and
-similar, you will need to run `using PersistenceDiagrams`.
+similar, you will need to run `using TDAPersistenceDiagrams`.
 
-For convenience, the following basic functionality is reexported by Ripserer:
+For convenience, the following basic functionality is reexported by TDARipserer:
 
 ```@docs
-PersistenceDiagrams.PersistenceDiagram
+TDAPersistenceDiagrams.PersistenceDiagram
 ```
 
 ```@docs
-PersistenceDiagrams.PersistenceInterval
+TDAPersistenceDiagrams.PersistenceInterval
 ```
 
 ```@docs
-birth(::PersistenceDiagrams.PersistenceInterval)
+birth(::TDAPersistenceDiagrams.PersistenceInterval)
 ```
 
 ```@docs
-death(::PersistenceDiagrams.PersistenceInterval)
+death(::TDAPersistenceDiagrams.PersistenceInterval)
 ```
 
 ```@docs
-persistence(::PersistenceDiagrams.PersistenceInterval)
+persistence(::TDAPersistenceDiagrams.PersistenceInterval)
 ```
 
 ```@docs
@@ -65,15 +65,15 @@ midlife
 ```
 
 ```@docs
-representative(::PersistenceDiagrams.PersistenceInterval)
+representative(::TDAPersistenceDiagrams.PersistenceInterval)
 ```
 
 ```@docs
-birth_simplex(::PersistenceDiagrams.PersistenceInterval)
+birth_simplex(::TDAPersistenceDiagrams.PersistenceInterval)
 ```
 
 ```@docs
-death_simplex(::PersistenceDiagrams.PersistenceInterval)
+death_simplex(::TDAPersistenceDiagrams.PersistenceInterval)
 ```
 
 ```@docs
@@ -83,31 +83,31 @@ barcode
 ## Simplices and Representatives
 
 ```@docs
-Ripserer.Simplex
+TDARipserer.Simplex
 ```
 
 ```@docs
-Ripserer.Cube
+TDARipserer.Cube
 ```
 
 ```@docs
-Ripserer.dim(::Ripserer.AbstractCell)
+TDARipserer.dim(::TDARipserer.AbstractCell)
 ```
 
 ```@docs
-Ripserer.birth(::Ripserer.AbstractCell)
+TDARipserer.birth(::TDARipserer.AbstractCell)
 ```
 
 ```@docs
-Ripserer.index(::Ripserer.AbstractCell)
+TDARipserer.index(::TDARipserer.AbstractCell)
 ```
 
 ```@docs
-Ripserer.vertices(::Ripserer.AbstractCell)
+TDARipserer.vertices(::TDARipserer.AbstractCell)
 ```
 
 ```@docs
-Ripserer.Chain
+TDARipserer.Chain
 ```
 
 ```@docs
@@ -117,125 +117,125 @@ Mod
 ## MLJ.jl Interface
 
 ```@docs
-Ripserer.RipsPersistentHomology
+TDARipserer.RipsPersistentHomology
 ```
 
 ```@docs
-Ripserer.AlphaPersistentHomology
+TDARipserer.AlphaPersistentHomology
 ```
 
 ```@docs
-Ripserer.CubicalPersistentHomology
+TDARipserer.CubicalPersistentHomology
 ```
 
 ## Experimental Features
 
 ```@docs
-Ripserer.reconstruct_cycle
+TDARipserer.reconstruct_cycle
 ```
 
 ```@docs
-Ripserer.Partition
+TDARipserer.Partition
 ```
 
 ```@docs
-Ripserer.CircularCoordinates
+TDARipserer.CircularCoordinates
 ```
 
 ## Abstract Types and Interfaces
 
 ```@docs
-Ripserer.AbstractFiltration
+TDARipserer.AbstractFiltration
 ```
 
 ```@docs
-Ripserer.nv(::Ripserer.AbstractFiltration)
+TDARipserer.nv(::TDARipserer.AbstractFiltration)
 ```
 
 ```@docs
-Ripserer.births(::Ripserer.AbstractFiltration)
+TDARipserer.births(::TDARipserer.AbstractFiltration)
 ```
 
 ```@docs
-Ripserer.vertices(::Ripserer.AbstractFiltration)
+TDARipserer.vertices(::TDARipserer.AbstractFiltration)
 ```
 
 ```@docs
-Ripserer.edges(::Ripserer.AbstractFiltration)
+TDARipserer.edges(::TDARipserer.AbstractFiltration)
 ```
 
 ```@docs
-Ripserer.simplex_type
+TDARipserer.simplex_type
 ```
 
 ```@docs
-Ripserer.simplex
+TDARipserer.simplex
 ```
 
 ```@docs
-Ripserer.unsafe_simplex
+TDARipserer.unsafe_simplex
 ```
 
 ```@docs
-Ripserer.unsafe_cofacet
+TDARipserer.unsafe_cofacet
 ```
 
 ```@docs
-Ripserer.threshold(::Ripserer.AbstractFiltration)
+TDARipserer.threshold(::TDARipserer.AbstractFiltration)
 ```
 
 ```@docs
-Ripserer.columns_to_reduce
+TDARipserer.columns_to_reduce
 ```
 
 ```@docs
-Ripserer.emergent_pairs
+TDARipserer.emergent_pairs
 ```
 
 ```@docs
-Ripserer.postprocess_diagram
+TDARipserer.postprocess_diagram
 ```
 
 ```@docs
-Ripserer.distance_matrix
+TDARipserer.distance_matrix
 ```
 
 ```@docs
-Ripserer.AbstractRipsFiltration
+TDARipserer.AbstractRipsFiltration
 ```
 
 ```@docs
-Ripserer.adjacency_matrix(::Ripserer.AbstractFiltration)
+TDARipserer.adjacency_matrix(::TDARipserer.AbstractFiltration)
 ```
 
 ```@docs
-Ripserer.AbstractCustomFiltration
+TDARipserer.AbstractCustomFiltration
 ```
 
 ```@docs
-Ripserer.simplex_dicts
+TDARipserer.simplex_dicts
 ```
 
 ```@docs
-Ripserer.AbstractCell
+TDARipserer.AbstractCell
 ```
 
 ```@docs
-Ripserer.AbstractSimplex
+TDARipserer.AbstractSimplex
 ```
 
 ```@docs
-Base.sign(::Ripserer.AbstractCell)
+Base.sign(::TDARipserer.AbstractCell)
 ```
 
 ```@docs
-Base.:-(::Ripserer.AbstractCell)
+Base.:-(::TDARipserer.AbstractCell)
 ```
 
 ```@docs
-Ripserer.coboundary
+TDARipserer.coboundary
 ```
 
 ```@docs
-Ripserer.boundary
+TDARipserer.boundary
 ```

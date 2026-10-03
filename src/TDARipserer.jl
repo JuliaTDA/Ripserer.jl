@@ -1,11 +1,11 @@
 """
-# Ripserer.jl
+# TDARipserer.jl
 
 Efficient computation of persistent homology.
 
-See https://mtsch.github.io/Ripserer.jl/dev/ for documentation.
+Experimental JuliaTDA fork of Ripserer.jl. See the documentation in `docs/src`.
 """
-module Ripserer
+module TDARipserer
 
 using Compat
 
@@ -19,7 +19,7 @@ using Distances
 using IterTools
 using Graphs
 using MiniQhull
-using PersistenceDiagrams
+using TDAPersistenceDiagrams
 using ProgressMeter
 using RecipesBase
 using StaticArrays
@@ -31,8 +31,8 @@ import MLJModelInterface
 # piracy involved here.
 import Graphs: vertices, edges, nv, adjacency_matrix
 
-# Reexporting basics makes Ripserer usable without having to import another package.
-import PersistenceDiagrams: birth, threshold, dim
+# Reexporting basics makes TDARipserer usable without having to import another package.
+import TDAPersistenceDiagrams: birth, threshold, dim
 export birth,
     death, persistence, midlife, representative, birth_simplex, death_simplex, barcode
 

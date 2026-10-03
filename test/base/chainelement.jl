@@ -1,7 +1,7 @@
 using Test
-using Ripserer
+using TDARipserer
 
-using Ripserer:
+using TDARipserer:
     ChainElement,
     PackedElement,
     chain_element_type,
@@ -133,7 +133,7 @@ for S in (Simplex{2,Float64,Int}, Simplex{3,Float64,Int32})
         )
 
         big_index = typemax(Int) >> 7
-        n = Ripserer._vertices(big_index, Val(3))[1]
+        n = TDARipserer._vertices(big_index, Val(3))[1]
         @test begin
             index_overflow_check(Simplex{2,Int,Int}, Mod{2}, n, "")
             true

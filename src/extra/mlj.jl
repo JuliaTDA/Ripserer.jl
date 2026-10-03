@@ -1,6 +1,6 @@
 const MMI = MLJModelInterface
 
-using PersistenceDiagrams: AbstractVectorizer
+using TDAPersistenceDiagrams: AbstractVectorizer
 
 abstract type RipsererModel <: MMI.Unsupervised end
 
@@ -50,8 +50,8 @@ values.
 # Hyperparameters
 
 * `vectorizer = PersistenceImageVectorizer()`: `AbstractVectorizer` used to transform
-  persistence diagrams to continuous vectors. See the [PersistenceDiagrams.jl
-  Documentation](https://mtsch.github.io/PersistenceDiagrams.jl/dev/mlj/) for more
+  persistence diagrams to continuous vectors. See the [TDAPersistenceDiagrams.jl
+  Documentation](https://github.com/JuliaTDA/PersistenceDiagrams.jl/blob/master/docs/src/mlj.md) for more
   information.
 
 * `dim_max = 1`: compute persistent homology up to this dimension.
@@ -130,8 +130,8 @@ values.
 # Hyperparameters
 
 * `vectorizer = PersistenceImageVectorizer()`: `AbstractVectorizer` used to transform
-  persistence diagrams to continuous vectors. See the [PersistenceDiagrams.jl
-  Documentation](https://mtsch.github.io/PersistenceDiagrams.jl/dev/mlj/) for more
+  persistence diagrams to continuous vectors. See the [TDAPersistenceDiagrams.jl
+  Documentation](https://github.com/JuliaTDA/PersistenceDiagrams.jl/blob/master/docs/src/mlj.md) for more
   information.
 
 * `dim_max = 1`: compute persistent homology up to this dimension.
@@ -182,8 +182,8 @@ values.
 # Hyperparameters
 
 * `vectorizer = PersistenceImageVectorizer()`: `AbstractVectorizer` used to transform
-  persistence diagrams to continuous vectors. See the [PersistenceDiagrams.jl
-  Documentation](https://mtsch.github.io/PersistenceDiagrams.jl/dev/mlj/) for more
+  persistence diagrams to continuous vectors. See the [TDAPersistenceDiagrams.jl
+  Documentation](https://github.com/JuliaTDA/PersistenceDiagrams.jl/blob/master/docs/src/mlj.md) for more
   information.
 
 * `dim_max = 1`: compute persistent homology up to this dimension.
@@ -232,9 +232,9 @@ end
 
 MMI.metadata_pkg.(
     (RipsPersistentHomology, AlphaPersistentHomology, CubicalPersistentHomology),
-    name="Ripserer",
-    uuid="aa79e827-bd0b-42a8-9f10-2b302677a641",
-    url="https://github.com/mtsch/Ripserer.jl",
+    name="TDARipserer",
+    uuid="d8d97730-eb17-4b7a-9fb6-200f7d8ece7d",
+    url="https://github.com/JuliaTDA/Ripserer.jl",
     license="MIT",
     julia=true,
     is_wrapper=false,

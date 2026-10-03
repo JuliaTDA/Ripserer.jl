@@ -1,7 +1,7 @@
-using Ripserer
+using TDARipserer
 using Test
 using MLJBase
-using PersistenceDiagrams
+using TDAPersistenceDiagrams
 
 include("../testdatasets.jl")
 

@@ -1,17 +1,17 @@
 # # Usage Guide
 
-# In this example, we will present the basics of using Ripserer. We start by loading some
+# In this example, we will present the basics of using TDARipserer. We start by loading some
 # packages.
 
 using Distances
 using Plots
-using Ripserer
+using TDARipserer
 using Random # hide
 Random.seed!(1337) # hide
 gr() # hide
 nothing # hide
 
-# ## Using Ripserer With Point Cloud Data
+# ## Using TDARipserer With Point Cloud Data
 
 # Let's start with generating some points, randomly sampled from a noisy circle.
 
@@ -28,7 +28,7 @@ circ_100 = noisy_circle(100)
 scatter(circ_100; aspect_ratio=1, legend=false, title="Noisy Circle")
 
 # !!! tip "Point-like data types"
-#     Ripserer can interpret various kinds of data as point clouds. The limitation is that
+#     TDARipserer can interpret various kinds of data as point clouds. The limitation is that
 #     the data set should be an `AbstractVector` with elements with the following
 #     properties:
 #     * all elements are collections numbers;
@@ -273,5 +273,5 @@ index(simplex), dim(simplex), birth(simplex)
 
 # ## Conclusion
 
-# This concludes the basic usage of Ripserer. For more detailed information, please check
+# This concludes the basic usage of TDARipserer. For more detailed information, please check
 # out the [API](@ref) page, as well as other examples.

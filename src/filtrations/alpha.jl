@@ -172,10 +172,10 @@ Alpha{Int64, Float64}(nv=100)
 julia> rips = Rips(data)
 Rips{Int64, Float64}(nv=100, sparse=false)
 
-julia> length(Ripserer.edges(alpha))
+julia> length(TDARipserer.edges(alpha))
 197
 
-julia> length(Ripserer.edges(rips))
+julia> length(TDARipserer.edges(rips))
 3613
 
 julia> sort(ripserer(alpha)[2], by=persistence)[end]

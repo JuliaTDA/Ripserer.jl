@@ -8,12 +8,12 @@ interface.
 # Example
 
 ```jldoctest
-julia> struct MyRips <: Ripserer.AbstractRipsFiltration{Int, Float16} end
+julia> struct MyRips <: TDARipserer.AbstractRipsFiltration{Int, Float16} end
 
-julia> Ripserer.adjacency_matrix(::MyRips) = [0 1 1; 1 0 1; 1 1 0]
+julia> TDARipserer.adjacency_matrix(::MyRips) = [0 1 1; 1 0 1; 1 1 0]
 
 julia> ripserer(MyRips())
-2-element Vector{PersistenceDiagrams.PersistenceDiagram}:
+2-element Vector{TDAPersistenceDiagrams.PersistenceDiagram}:
  3-element 0-dimensional PersistenceDiagram
  0-element 1-dimensional PersistenceDiagram
 
@@ -185,7 +185,7 @@ faster.
 julia> data = [(sin(t), cos(t)) for t in range(0, 2π, length=101)][1:end-1];
 
 julia> ripserer(Rips(data))
-2-element Vector{PersistenceDiagrams.PersistenceDiagram}:
+2-element Vector{TDAPersistenceDiagrams.PersistenceDiagram}:
  100-element 0-dimensional PersistenceDiagram
  1-element 1-dimensional PersistenceDiagram
 

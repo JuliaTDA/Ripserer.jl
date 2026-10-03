@@ -5,11 +5,11 @@
 # change in the resulting persistence diagram. In other words, persistent homology is very
 # tolerant of noisy data. Also, see the
 # [Distances](https://mtsch.github.io/PersistenceDiagrams.jl/dev/generated/distances/)
-# example in [PersistenceDiagrams.jl](https://github.com/mtsch/PersistenceDiagrams.jl).
+# example in [TDAPersistenceDiagrams.jl](https://github.com/mtsch/PersistenceDiagrams.jl).
 
 # Again, start with loading some packages.
 
-using Ripserer
+using TDARipserer
 using Plots
 using Random; # hide
 Random.seed!(1337); # hide

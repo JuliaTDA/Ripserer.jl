@@ -54,7 +54,7 @@ diagram, and the last is the (`dim_max`)-dimensional diagram.
   mod `modulus`. Defaults to `2`.
 
 * `field`: use this type of field of coefficients. Defaults to
-  [`Ripserer.Mod`](@ref)`{modulus}`.
+  [`TDARipserer.Mod`](@ref)`{modulus}`.
 
 * `threshold`: compute persistent homology up to diameter smaller than threshold. Note that
   this parameter is passed to the filtration constructor. When using low thresholds with
@@ -98,17 +98,17 @@ julia> ts = range(0, 2π; length=20)[1:(end - 1)];
 julia> X = [((2 + cos(θ)) * cos(φ), (2 + cos(θ)) * sin(φ), sin(θ)) for θ in ts for φ in ts];
 
 julia> ripserer(X)
-2-element Vector{PersistenceDiagrams.PersistenceDiagram}:
+2-element Vector{TDAPersistenceDiagrams.PersistenceDiagram}:
  361-element 0-dimensional PersistenceDiagram
  362-element 1-dimensional PersistenceDiagram
 
 julia> ripserer(EdgeCollapsedRips, X; modulus=7, threshold=2)
-2-element Vector{PersistenceDiagrams.PersistenceDiagram}:
+2-element Vector{TDAPersistenceDiagrams.PersistenceDiagram}:
  361-element 0-dimensional PersistenceDiagram
  362-element 1-dimensional PersistenceDiagram
 
 julia> ripserer(Rips(X; threshold=1); alg=:involuted)
-2-element Vector{PersistenceDiagrams.PersistenceDiagram}:
+2-element Vector{TDAPersistenceDiagrams.PersistenceDiagram}:
  361-element 0-dimensional PersistenceDiagram
  362-element 1-dimensional PersistenceDiagram
 

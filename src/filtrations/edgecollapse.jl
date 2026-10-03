@@ -163,20 +163,20 @@ julia> data = [tuple(rand(6)...) for _ in 1:100];
 julia> rips = Rips(data)
 Rips{Int64, Float64}(nv=100, sparse=false)
 
-julia> length(Ripserer.edges(rips))
+julia> length(TDARipserer.edges(rips))
 3934
 
 julia> collapsed = EdgeCollapsedRips(data) # or EdgeCollapsedRips(rips)
 EdgeCollapsedRips{Int64, Float64}(nv=100)
 
-julia> length(Ripserer.edges(collapsed))
+julia> length(TDARipserer.edges(collapsed))
 1324
 
 julia> ripserer(rips) == ripserer(collapsed)
 true
 
 julia> ripserer(collapsed; dim_max=4)
-5-element Vector{PersistenceDiagrams.PersistenceDiagram}:
+5-element Vector{TDAPersistenceDiagrams.PersistenceDiagram}:
  100-element 0-dimensional PersistenceDiagram
  58-element 1-dimensional PersistenceDiagram
  35-element 2-dimensional PersistenceDiagram

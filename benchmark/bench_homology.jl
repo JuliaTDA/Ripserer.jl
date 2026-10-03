@@ -1,7 +1,7 @@
 module BenchHomology
 
 using BenchmarkTools
-using Ripserer
+using TDARipserer
 
 include(joinpath(@__DIR__, "utils.jl"))
 

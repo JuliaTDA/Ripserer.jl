@@ -1,8 +1,8 @@
-using Ripserer
+using TDARipserer
 using Test
 
 using DataStructures
-using Ripserer: DisjointSetsWithBirth, find_leaves!
+using TDARipserer: DisjointSetsWithBirth, find_leaves!
 
 for arr in (1:10, CartesianIndices([1 2 3 4 5; 1 2 3 4 5]))
     @testset "with $(typeof(collect(arr)))" begin

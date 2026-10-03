@@ -38,10 +38,10 @@ needs to be overloaded.
 # Examples
 
 ```jldoctest
-julia> Ripserer.simplex_type(Rips{Int,Float64}, 1)
+julia> TDARipserer.simplex_type(Rips{Int,Float64}, 1)
 Simplex{1, Float64, Int64}
 
-julia> Ripserer.simplex_type(Cubical{2,Float16}, 2)
+julia> TDARipserer.simplex_type(Cubical{2,Float16}, 2)
 Cube{2, Float16, 2}
 
 ```
@@ -59,7 +59,7 @@ Return the number of vertices in `filtration`.
 # Example
 
 ```jldoctest
-julia> Ripserer.nv(Rips([1 1; 1 1]))
+julia> TDARipserer.nv(Rips([1 1; 1 1]))
 2
 
 ```
@@ -75,7 +75,7 @@ Get edges (1-simplices) in `filtration`. Edges should be of type
 # Example
 
 ```
-julia> Ripserer.edges(Rips([0 2 1; 2 0 1; 1 1 0], threshold=2))
+julia> TDARipserer.edges(Rips([0 2 1; 2 0 1; 1 1 0], threshold=2))
 3-element Array{Simplex{1,Int64,Int64},1}:
  +Simplex{1}([2, 1], 2)
  +Simplex{1}([3, 1], 1)
@@ -179,7 +179,7 @@ array of the same shape as the filtration's `vertices`.
 ```jldoctest
 julia> flt = Rips([1 1 2; 1 0 1; 2 1 0]);
 
-julia> Ripserer.births(flt)
+julia> TDARipserer.births(flt)
 3-element view(::Vector{Int64}, 1:4:9) with eltype Int64:
  1
  0
@@ -216,19 +216,19 @@ Return the adjacency matrix. For sparse filtrations, this should return a `Spars
 # Examples
 
 ```jldoctest
-julia> Ripserer.adjacency_matrix(Rips([0 2 1; 2 0 1; 1 1 0]))
+julia> TDARipserer.adjacency_matrix(Rips([0 2 1; 2 0 1; 1 1 0]))
 3×3 Matrix{Int64}:
  0  2  1
  2  0  1
  1  1  0
 
-julia> Ripserer.adjacency_matrix(Rips([0 10 2; 10 0 1; 2 1 0]; sparse=true))
+julia> TDARipserer.adjacency_matrix(Rips([0 10 2; 10 0 1; 2 1 0]; sparse=true))
 3×3 SparseArrays.SparseMatrixCSC{Int64, Int64} with 4 stored entries:
  ⋅  ⋅  2
  ⋅  ⋅  1
  2  1  ⋅
 
-julia> Ripserer.adjacency_matrix(Custom([(2, 1) => 1, (5, 1) => 2, (3, 4) => 3]))
+julia> TDARipserer.adjacency_matrix(Custom([(2, 1) => 1, (5, 1) => 2, (3, 4) => 3]))
 5×5 SparseArrays.SparseMatrixCSC{Bool, Int64} with 6 stored entries:
  ⋅  1  ⋅  ⋅  1
  1  ⋅  ⋅  ⋅  ⋅
@@ -252,7 +252,7 @@ set to `Val(false)`.
 ```jldoctest
 julia> flt = Rips([0 1 1; 1 0 1; 1 1 0]);
 
-julia> Ripserer.columns_to_reduce(flt, Ripserer.edges(flt)) |> collect
+julia> TDARipserer.columns_to_reduce(flt, TDARipserer.edges(flt)) |> collect
 1-element Vector{Simplex{2, Int64, Int64}}:
  +Simplex{2}((3, 2, 1), 1)
 
@@ -326,7 +326,7 @@ Defaults to all distances being 1.
 ```jldoctest
 julia> flt = Rips([1 1 2; 1 0 1; 2 1 0]);
 
-julia> Ripserer.distance_matrix(flt)
+julia> TDARipserer.distance_matrix(flt)
 3×3 Matrix{Int64}:
  1  1  2
  1  0  1
@@ -334,8 +334,8 @@ julia> Ripserer.distance_matrix(flt)
 
 julia> flt = Custom([(1,2,3,4) => 10.0, (1,2) => 3.0, (1,3) => 4.0, (2,3) => 5.0]);
 
-julia> Ripserer.distance_matrix(flt)
-4×4 Ripserer.DefaultDist{Float64}:
+julia> TDARipserer.distance_matrix(flt)
+4×4 TDARipserer.DefaultDist{Float64}:
  0.0  1.0  1.0  1.0
  1.0  0.0  1.0  1.0
  1.0  1.0  0.0  1.0

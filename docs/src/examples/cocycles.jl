@@ -1,13 +1,13 @@
 # # Cohomology, Homology, and Representatives
 
-# In this section, we will show how Ripserer can be used to find critical simplices and
+# In this section, we will show how TDARipserer can be used to find critical simplices and
 # representative (co)cycles.
 
 # We start by loading some packages and generating some data.
 
 using LinearAlgebra
 using Plots
-using Ripserer
+using TDARipserer
 using Random # hide
 Random.seed!(1337) # hide
 gr() # hide
@@ -34,7 +34,7 @@ diagram = ripserer(data)
 plot(diagram)
 
 # The diagram tells us that there is a persistent hole in the data, but tells us nothing
-# about the location of the hole. Ripserer provides several methods to locate it. We'll
+# about the location of the hole. TDARipserer provides several methods to locate it. We'll
 # start with the simplest.
 
 # ## Critical simplices
@@ -55,7 +55,7 @@ death_sx = death_simplex(most_persistent)
 
 data[death_sx]
 
-# Ripserer also provides a Plots recipe for plotting simplices. It is invoked by passing the
+# TDARipserer also provides a Plots recipe for plotting simplices. It is invoked by passing the
 # simplex and the data to `plot`. Not that only the edges of the simplices are plotted.
 
 scatter(data; label="data", markersize=2, aspect_ratio=1)
@@ -70,9 +70,9 @@ plot!(birth_simplex(diagram[2][end]), data; label="birth simplex")
 
 # ## Representative Cocycles
 
-# By default, Ripserer computes persistent cohomology. The resulting diagrams of persistent
+# By default, TDARipserer computes persistent cohomology. The resulting diagrams of persistent
 # homology and cohomology are the same, but computing cohomology is much more
-# efficient. When computing persistent cohomology, we can tell Ripserer to also compute
+# efficient. When computing persistent cohomology, we can tell TDARipserer to also compute
 # representative cocycles. This is controlled with the `reps` keyword argument.
 
 # Let's take a look at the most persistent cocycle of our data set.
@@ -98,7 +98,7 @@ plot!(cocycle, data; label="cocycle")
 
 # ## Representative Cycles
 
-# Ripserer supports two algorithms for computing representative cocycles. One is computing
+# TDARipserer supports two algorithms for computing representative cocycles. One is computing
 # persistent homology directly, and the other is involuted homology computation. Involuted
 # homology computes cohomology first and then uses its result to recompute cycles. While
 # this increases the running time somewhat, it is still usually much more efficient than

@@ -1,7 +1,7 @@
-using Ripserer
+using TDARipserer
 using Test
 
-using Ripserer: is_prime
+using TDARipserer: is_prime
 
 @testset "is_prime" begin
     @test !is_prime(1)

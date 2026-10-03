@@ -1,9 +1,9 @@
-using PersistenceDiagrams
-using Ripserer
+using TDAPersistenceDiagrams
+using TDARipserer
 using RecipesBase
 using Test
 
-using Ripserer: plottable, ChainElement
+using TDARipserer: plottable, ChainElement
 using RecipesBase: apply_recipe
 
 # Hack to avoid having to import Plots.

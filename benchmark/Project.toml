@@ -2,5 +2,5 @@
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-Ripserer = "aa79e827-bd0b-42a8-9f10-2b302677a641"
+TDARipserer = "d8d97730-eb17-4b7a-9fb6-200f7d8ece7d"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"

@@ -1,21 +1,21 @@
 using Compat
 using Distances
-using PersistenceDiagrams
-using Ripserer
+using TDAPersistenceDiagrams
+using TDARipserer
 using SparseArrays
 using StaticArrays
 using Test
 
 include("../testdatasets.jl")
 include("interfacetest.jl")
-using Ripserer: nv, edges
+using TDARipserer: nv, edges
 
 # Julia 1.0 does not allow these to be defined inside @testset.
 
 # This test is mostly supposed to test that pre-finding apparent pairs with
 # `find_apparent_pairs` first works correctly. On the side, it also tests that rips
 # filtrations that only overload `adjacency_matrix` and `threshold` work fine.
-struct ApparentPairsRips{I,T,R<:Rips{I,T}} <: Ripserer.AbstractRipsFiltration{I,T}
+struct ApparentPairsRips{I,T,R<:Rips{I,T}} <: TDARipserer.AbstractRipsFiltration{I,T}
     rips::R
     apparent::Ref{Int}
     normal::Ref{Int}
@@ -25,20 +25,20 @@ function ApparentPairsRips(data; kwargs...)
     return ApparentPairsRips(Rips(data; kwargs...), Ref(0), Ref(0))
 end
 
-Ripserer.adjacency_matrix(rw::ApparentPairsRips) = Ripserer.adjacency_matrix(rw.rips)
-Ripserer.threshold(rw::ApparentPairsRips) = Ripserer.threshold(rw.rips)
+TDARipserer.adjacency_matrix(rw::ApparentPairsRips) = TDARipserer.adjacency_matrix(rw.rips)
+TDARipserer.threshold(rw::ApparentPairsRips) = TDARipserer.threshold(rw.rips)
 
 # This works fine but is slower than the original algorithm (even if the pair finding code
 # was optimized) as apparent pairs are found in `initialize_coboundary!` anyway. Doing this
 # in parallel or on the GPU is an option, however.  See https://arxiv.org/abs/2003.07989
-function Ripserer.find_apparent_pairs(rw::ApparentPairsRips, columns, _)
+function TDARipserer.find_apparent_pairs(rw::ApparentPairsRips, columns, _)
     S = eltype(columns)
-    C = Ripserer.simplex_type(rw, dim(S) + 1)
+    C = TDARipserer.simplex_type(rw, dim(S) + 1)
     cols_left = S[]
     apparent = Tuple{S,C}[]
     for σ in columns
-        τ = minimum(Ripserer.coboundary(rw, σ)) # This is broken if coboundary is empty.
-        σ′ = maximum(Ripserer.boundary(rw, τ))
+        τ = minimum(TDARipserer.coboundary(rw, σ)) # This is broken if coboundary is empty.
+        σ′ = maximum(TDARipserer.boundary(rw, τ))
         if σ′ == σ
             rw.apparent[] += 1
             push!(apparent, (σ, τ))
@@ -79,19 +79,19 @@ end
 
 # This test checks that apparent pairs can produce correct intervals. On the side, it checks
 # `AbstractCustomFiltration`s.
-struct ApparentPairsCustom <: Ripserer.AbstractCustomFiltration{Int,Int}
+struct ApparentPairsCustom <: TDARipserer.AbstractCustomFiltration{Int,Int}
     found::Ref{Bool}
 end
 ApparentPairsCustom() = ApparentPairsCustom(Ref(false))
 
-function Ripserer.simplex_dicts(::ApparentPairsCustom)
+function TDARipserer.simplex_dicts(::ApparentPairsCustom)
     return [Dict(1 => 0, 2 => 0, 3 => 0), Dict(1 => 1, 2 => 1, 3 => 2), Dict(1 => 3)]
 end
-Ripserer.adjacency_matrix(::ApparentPairsCustom) = sparse(Bool[0 1 1; 1 0 1; 1 1 0])
-function Ripserer.find_apparent_pairs(a::ApparentPairsCustom, columns, _)
+TDARipserer.adjacency_matrix(::ApparentPairsCustom) = sparse(Bool[0 1 1; 1 0 1; 1 1 0])
+function TDARipserer.find_apparent_pairs(a::ApparentPairsCustom, columns, _)
     σ = columns[1]
     a.found[] = true
-    return typeof(σ)[], [(σ, only(Ripserer.coboundary(a, σ)))]
+    return typeof(σ)[], [(σ, only(TDARipserer.coboundary(a, σ)))]
 end
 
 @testset "Apparent pairs can produce valid intervals." begin
@@ -109,20 +109,20 @@ end
 end
 
 # The main idea of this test is to test postprocess_diagrams
-struct ReversedResult <: Ripserer.AbstractFiltration{Int,Int} end
+struct ReversedResult <: TDARipserer.AbstractFiltration{Int,Int} end
 
-function Ripserer.unsafe_simplex(::Type{Simplex{0,Int,Int}}, ::ReversedResult, (v,))
+function TDARipserer.unsafe_simplex(::Type{Simplex{0,Int,Int}}, ::ReversedResult, (v,))
     return Simplex{0}(v, 0)
 end
-function Ripserer.unsafe_simplex(
+function TDARipserer.unsafe_simplex(
     ::Type{Simplex{D,Int,Int}}, ::ReversedResult, vertices
 ) where {D}
     return Simplex{D}(index(vertices), 1)
 end
-Ripserer.nv(::ReversedResult) = 10
-Ripserer.simplex_type(::Type{ReversedResult}, D) = Simplex{D,Int,Int}
-Ripserer.edges(::ReversedResult) = Simplex{1}.(10:-1:1, 1)
-function Ripserer.postprocess_diagram(::ReversedResult, diagram)
+TDARipserer.nv(::ReversedResult) = 10
+TDARipserer.simplex_type(::Type{ReversedResult}, D) = Simplex{D,Int,Int}
+TDARipserer.edges(::ReversedResult) = Simplex{1}.(10:-1:1, 1)
+function TDARipserer.postprocess_diagram(::ReversedResult, diagram)
     return reverse!(diagram)
 end
 

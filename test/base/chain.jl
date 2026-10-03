@@ -1,8 +1,8 @@
 using Test
 using DataStructures
-using Ripserer
+using TDARipserer
 
-using Ripserer: Chain, ChainElement, coefficient_type, simplex_type, heapmove!, clean!
+using TDARipserer: Chain, ChainElement, coefficient_type, simplex_type, heapmove!, clean!
 
 for F in (Mod{2}, Mod{3}, Mod{257}, Rational{Int})
     @testset "Chain with $F" begin
@@ -42,7 +42,7 @@ for F in (Mod{2}, Mod{3}, Mod{257}, Rational{Int})
             if F === Mod{2}
                 @test eltype(chain.elements) <: Simplex
             elseif F === Mod{3}
-                @test eltype(chain.elements) <: Ripserer.PackedElement
+                @test eltype(chain.elements) <: TDARipserer.PackedElement
             else
                 @test eltype(chain.elements) <: ChainElement
             end

@@ -1,9 +1,9 @@
-using Ripserer
+using TDARipserer
 using SparseArrays
 using Test
 using TupleTools
 
-using Ripserer: adjacency_matrix, births
+using TDARipserer: adjacency_matrix, births
 
 include("interfacetest.jl")
 
@@ -103,7 +103,7 @@ end
 end
 
 @testset "Overflow" begin
-    big_simplex = Tuple(Ripserer._vertices(Int128(typemax(Int64) ÷ 2), Val(6)))
+    big_simplex = Tuple(TDARipserer._vertices(Int128(typemax(Int64) ÷ 2), Val(6)))
     @test_throws OverflowError Custom{Int}([big_simplex => 1])
     @test begin
         Custom{Int128}([big_simplex => 1])

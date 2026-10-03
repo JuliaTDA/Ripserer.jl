@@ -1,5 +1,5 @@
 # This file generates the plot in the logo
-using Ripserer
+using TDARipserer
 using Plots
 gr()
 using Random

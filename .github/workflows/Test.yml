@@ -19,6 +19,8 @@ jobs:
       - uses: julia-actions/setup-julia@latest
         with:
           version: ${{ matrix.julia-version }}
+      - name: Develop the unregistered diagram fork
+        run: julia --project=. -e 'using Pkg; Pkg.develop(PackageSpec(url="https://github.com/JuliaTDA/PersistenceDiagrams.jl")); Pkg.instantiate()'
       - uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@latest
       - uses: julia-actions/julia-processcoverage@v1
@@ -33,5 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@latest
+      - name: Develop the unregistered diagram fork
+        run: julia --project=. -e 'using Pkg; Pkg.develop(PackageSpec(url="https://github.com/JuliaTDA/PersistenceDiagrams.jl")); Pkg.instantiate()'
       - uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@latest

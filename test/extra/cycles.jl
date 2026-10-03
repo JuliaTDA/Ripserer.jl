@@ -1,8 +1,8 @@
 using Graphs
-using Ripserer
+using TDARipserer
 using Test
 
-using Ripserer: distance_matrix, OneSkeleton
+using TDARipserer: distance_matrix, OneSkeleton
 
 @testset "OneSkeleton respects the Graphs interface" begin
     @testset "no threshold or removed simplices" begin

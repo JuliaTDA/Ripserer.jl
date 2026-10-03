@@ -1,7 +1,7 @@
-using Ripserer
+using TDARipserer
 using Test
 
-using Ripserer: Chain, ChainElement, ReducedMatrix, bulk_insert!
+using TDARipserer: Chain, ChainElement, ReducedMatrix, bulk_insert!
 
 for F in (Mod{2}, Mod{3}, Mod{257}, Rational{Int})
     @testset "ReducedMatrix with $F" begin

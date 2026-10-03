@@ -2,8 +2,8 @@
 using Documenter
 using Distances
 using Literate
-using Ripserer
-using PersistenceDiagrams
+using TDARipserer
+using TDAPersistenceDiagrams
 using Plots
 gr()
 ENV["GKSwstype"] = "100"
@@ -17,7 +17,7 @@ for example in readdir(EXAMPLES_INPUT; join=true)
 end
 
 makedocs(;
-    sitename="Ripserer.jl",
+    sitename="TDARipserer.jl",
     format=Documenter.HTML(
         # Use clean URLs, unless built as a "local" build;
         ;
@@ -37,4 +37,4 @@ makedocs(;
     doctest=false, # Doctests are run as part of testing -- no need to run them twice.
 )
 
-deploydocs(; repo="github.com/mtsch/Ripserer.jl.git")
+deploydocs(; repo="github.com/JuliaTDA/Ripserer.jl.git")

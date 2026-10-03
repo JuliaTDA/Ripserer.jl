@@ -50,7 +50,7 @@ end
 
 function Graphs.edges(g::OneSkeleton)
     result = edgetype(g)[]
-    for sx in Ripserer.edges(g.filtration)
+    for sx in TDARipserer.edges(g.filtration)
         if _in(sx, g)
             u, v = _linear.(Ref(g), sx)
             push!(result, Edge(u, v))
@@ -61,7 +61,7 @@ end
 function Graphs.outneighbors(g::OneSkeleton, u::Integer)
     root = simplex(g.filtration, Val(0), (_inv_linear(g, u),))
     neighbors = Int[]
-    for sx in Ripserer.coboundary(g.filtration, root)
+    for sx in TDARipserer.coboundary(g.filtration, root)
         if _in(sx, g)
             v, w = _linear.(Ref(g), sx)
             if v == u

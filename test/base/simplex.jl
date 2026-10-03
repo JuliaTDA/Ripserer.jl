@@ -1,20 +1,20 @@
-using Ripserer
+using TDARipserer
 using StaticArrays
 using Test
 
-using Ripserer: _binomial, _vertices, coboundary, boundary
+using TDARipserer: _binomial, _vertices, coboundary, boundary
 
-struct FakeFiltration <: Ripserer.AbstractFiltration{Int,Int} end
-function Ripserer.unsafe_simplex(
+struct FakeFiltration <: TDARipserer.AbstractFiltration{Int,Int} end
+function TDARipserer.unsafe_simplex(
     ::Type{Simplex{D,Int,Int}}, ::FakeFiltration, vertices
 ) where {D}
     return Simplex{D,Int,Int}(index(vertices), 1)
 end
-Ripserer.nv(::FakeFiltration) = 20
-Ripserer.simplex_type(::Type{FakeFiltration}, D) = Simplex{D,Int,Int}
+TDARipserer.nv(::FakeFiltration) = 20
+TDARipserer.simplex_type(::Type{FakeFiltration}, D) = Simplex{D,Int,Int}
 
-struct FakeFiltrationWithThreshold <: Ripserer.AbstractFiltration{Int,Int} end
-function Ripserer.unsafe_simplex(
+struct FakeFiltrationWithThreshold <: TDARipserer.AbstractFiltration{Int,Int} end
+function TDARipserer.unsafe_simplex(
     ::Type{Simplex{D,Int,Int}}, ::FakeFiltrationWithThreshold, vertices
 ) where {D}
     if maximum(vertices) > 10
@@ -23,8 +23,8 @@ function Ripserer.unsafe_simplex(
         return Simplex{D,Int,Int}(index(vertices), 1)
     end
 end
-Ripserer.nv(::FakeFiltrationWithThreshold) = 20
-Ripserer.simplex_type(::Type{FakeFiltrationWithThreshold}, D) = Simplex{D,Int,Int}
+TDARipserer.nv(::FakeFiltrationWithThreshold) = 20
+TDARipserer.simplex_type(::Type{FakeFiltrationWithThreshold}, D) = Simplex{D,Int,Int}
 
 @testset "Internal functions" begin
     @testset "_binomial" begin

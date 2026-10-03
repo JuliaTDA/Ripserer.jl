@@ -1,11 +1,11 @@
 using Compat
 using Random
-using Ripserer
+using TDARipserer
 using StaticArrays
 using Test
 using TupleTools
 
-using Ripserer:
+using TDARipserer:
     _one_hot, _cubemap, _from_cubemap, _to_cubemap, nv, coboundary, boundary, edges, births
 
 include("interfacetest.jl")

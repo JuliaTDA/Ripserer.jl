@@ -1,9 +1,9 @@
 using Test
-using Ripserer
+using TDARipserer
 using Suppressor
 using StaticArrays
 
-using Ripserer: circumcenter_radius2
+using TDARipserer: circumcenter_radius2
 
 include("interfacetest.jl")
 

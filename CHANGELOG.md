@@ -1,3 +1,10 @@
+# TDARipserer v0.1.0 (unreleased)
+
+* Establishes an independent experimental JuliaTDA fork of Ripserer.jl with its own package name and UUID.
+* Preserves the public function/type names; updates imports, MLJ metadata, tests and documentation to the new package identity.
+
+## Inherited upstream release history
+
 # v0.16.13
 
 Fix performance issues with high-dimensional `Custom` filtrations.

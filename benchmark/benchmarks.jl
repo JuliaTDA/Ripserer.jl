@@ -1,4 +1,4 @@
-using Ripserer
+using TDARipserer
 using BenchmarkTools
 
 const SUITE = BenchmarkGroup()
