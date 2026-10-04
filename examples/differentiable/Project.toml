@@ -1,0 +1,20 @@
+[deps]
+TDARipserer = "d8d97730-eb17-4b7a-9fb6-200f7d8ece7d"
+Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
+Lux = "b2108857-7c20-44ae-9111-449ecde12c47"
+Optimisers = "3bd65402-5787-11e9-1adc-39752487f4e2"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
+Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
+
+[compat]
+julia = "1.10"
+TDARipserer = "0.1"
+Flux = "0.16"
+Lux = "1"
+Optimisers = "0.4"
+Zygote = "0.7"
+Enzyme = "0.13"
+

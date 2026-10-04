@@ -28,6 +28,9 @@ makedocs(;
         "Home" => "index.md",
         "Usage Guide" => "generated/basics.md",
         "API" => "api.md",
+        "Differentiable persistence" => "differentiable.md",
+        "P2 workflows" => "p2_workflows.md",
+        "Witness and dynamic persistence" => "dynamic.md",
         "Examples" =>
             ["generated/stability.md", "generated/cocycles.md", "generated/cubical.md"],
         "Benchmarks" => "benchmarks.md",

@@ -23,6 +23,12 @@ end
 @safetestset "zerodimensional" begin
     include("computation/zerodimensional.jl")
 end
+@safetestset "zigzag" begin
+    include("computation/zigzag.jl")
+end
+@safetestset "vineyards" begin
+    include("computation/vineyards.jl")
+end
 
 @safetestset "rips" begin
     include("filtrations/rips.jl")
@@ -39,6 +45,9 @@ end
 @safetestset "edgecollapse" begin
     include("filtrations/edgecollapse.jl")
 end
+@safetestset "witness" begin
+    include("filtrations/witness.jl")
+end
 @safetestset "new filtrations" begin
     include("filtrations/newfiltrations.jl")
 end
@@ -51,6 +60,20 @@ end
 end
 @safetestset "mlj" begin
     include("extra/mlj.jl")
+end
+
+@safetestset "differentiable persistence forward" begin
+    include("extra/differentiable_forward.jl")
+end
+
+@safetestset "P2 workflows" begin
+    include("extra/p2_workflows.jl")
+end
+
+if VERSION>=v"1.9"
+    @safetestset "P2 optional extensions" begin
+        include("extra/p2_extensions.jl")
+    end
 end
 
 @safetestset "aqua" begin

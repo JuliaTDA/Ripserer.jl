@@ -1,5 +1,18 @@
 # TDARipserer v0.1.0 (unreleased)
 
+* Add differentiable finite Rips H0/H1 endpoints over F₂, topological losses,
+  optional ChainRulesCore/Enzyme extensions, finite-difference tests and executed
+  seeded Flux/Lux training examples.
+* Add recommended MLJ PH hyperparameter ranges and recursive pipeline tuning.
+
+* Add solver-certified F₂ optimal homologous cycles and filling volumes on
+  Rips/Custom through an optional JuMP/HiGHS extension, with deterministic tie handling.
+* Add DelayEmbeddings adapters, sliding-window PH and finite-threshold image pipelines.
+
+* Add relaxed weak and lazy witness filtrations, including zero-valued lazy witness edges and landmark provenance.
+* Add online sparse F2 zigzag persistence for simplex insertion/deletion streams in arbitrary homology dimensions.
+* Add fixed-complex vineyards, incremental boundary-reduction updates, chronological adjacent transpositions and continuous vine identities.
+
 * Establishes an independent experimental JuliaTDA fork of Ripserer.jl with its own package name and UUID.
 * Preserves the public function/type names; updates imports, MLJ metadata, tests and documentation to the new package identity.
 

@@ -1,0 +1,21 @@
+name: Differentiable persistence
+on: [push, pull_request]
+jobs:
+  ad:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        julia-version: ['1.10', '1']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: ${{ matrix.julia-version }}
+      - uses: julia-actions/cache@v2
+      - name: Install local fork and optional AD dependencies
+        run: julia --project=examples/differentiable -e 'using Pkg; Pkg.develop(PackageSpec(url="https://github.com/JuliaTDA/PersistenceDiagrams.jl")); Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
+      - name: Endpoint gradients and training examples
+        run: |
+          julia --project=examples/differentiable test/extra/differentiable.jl
+          julia --project=examples/differentiable examples/differentiable/flux.jl
+          julia --project=examples/differentiable examples/differentiable/lux.jl

@@ -1,8 +1,22 @@
 const MMI = MLJModelInterface
 
 using TDAPersistenceDiagrams: AbstractVectorizer
+import TDAPersistenceDiagrams: recommended_ranges, tuning_ranges
+export recommended_ranges, tuning_ranges
 
 abstract type RipsererModel <: MMI.Unsupervised end
+
+function recommended_ranges(model::RipsererModel)
+    base = (dim_max=(values=[0,1,2],),cutoff=(lower=0.0,upper=0.2))
+    if model isa CubicalPersistentHomology
+        return merge(base,(negate=(values=[true,false],),))
+    end
+    coefficients = (modulus=(values=[2,3,5],),)
+    if model isa RipsPersistentHomology
+        return merge(base,coefficients,(sparse=(values=[false,true],),collapse=(values=[false,true],)))
+    end
+    return merge(base,coefficients)
+end
 
 const PointLike{N} = AbstractVector{NTuple{N,MMI.Continuous}}
 const DistanceMatrix = AbstractMatrix{MMI.Continuous}
@@ -239,3 +253,8 @@ MMI.metadata_pkg.(
     julia=true,
     is_wrapper=false,
 )
+
+for T in (RipsPersistentHomology,AlphaPersistentHomology,CubicalPersistentHomology)
+    @eval MMI.hyperparameter_ranges(::Type{$T}) =
+        Tuple(get(recommended_ranges($T()),field,nothing) for field in fieldnames($T))
+end

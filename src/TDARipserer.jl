@@ -50,6 +50,16 @@ export Mod,
     Custom,
     Alpha,
     EdgeCollapsedRips,
+    Witness,
+    LazyWitness,
+    ZigzagEvent,
+    ZigzagPersistence,
+    zigzag_persistence,
+    zigzag_diagrams,
+    VinePoint,
+    Vineyard,
+    update_vineyard!,
+    vineyard_diagrams,
     ripserer,
     reconstruct_cycle,
     Partition,
@@ -79,9 +89,21 @@ include("filtrations/cubical.jl")
 include("filtrations/custom.jl")
 include("filtrations/alpha.jl")
 include("filtrations/edgecollapse.jl")
+include("filtrations/witness.jl")
+include("computation/binary_algebra.jl")
+include("computation/zigzag.jl")
+include("computation/vineyards.jl")
 
 include("extra/cycles.jl")
 include("extra/circularcoordinates.jl")
 include("extra/mlj.jl")
+include("extra/differentiable.jl")
+export PersistencePairing, persistence_pairing, differentiable_persistence, topological_loss
+
+include("extra/optimal_chains.jl")
+export OptimalChainResult, optimal_cycle, optimal_volume
+
+include("extra/workflows.jl")
+export delay_embedding, suggest_delay, sliding_window_ph, image_persistence
 
 end
