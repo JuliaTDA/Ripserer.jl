@@ -1,7 +1,7 @@
 name = "TDARipserer"
 uuid = "d8d97730-eb17-4b7a-9fb6-200f7d8ece7d"
-authors = ["Matija Čufar <matijacufar@gmail.com>", "G. Vituri <56522687+vituri@users.noreply.github.com>", "contributors"]
 version = "0.1.0"
+authors = ["Matija Čufar <matijacufar@gmail.com>", "G. Vituri <56522687+vituri@users.noreply.github.com>", "contributors"]
 
 [deps]
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
@@ -12,31 +12,43 @@ IterTools = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 MLJModelInterface = "e80e1ace-859a-464e-9ed9-23947d8ae3ea"
 MiniQhull = "978d7f02-9e05-4691-894f-ae31a51d76ca"
-TDAPersistenceDiagrams = "bbe17acd-c4ea-4f01-a2b8-42969f873a90"
 ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+TDAPersistenceDiagrams = "bbe17acd-c4ea-4f01-a2b8-42969f873a90"
 TupleTools = "9d95972d-f1c8-5527-a6e0-b4b365fa01f6"
 
+[weakdeps]
+ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+DelayEmbeddings = "5732040d-69e3-5649-938a-b6b4f237613f"
+Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
+HiGHS = "87dc4568-4c63-4d18-b0c0-bb2238e4078b"
+JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
+
+[extensions]
+TDARipsererChainRulesCoreExt = "ChainRulesCore"
+TDARipsererDelayEmbeddingsExt = "DelayEmbeddings"
+TDARipsererEnzymeExt = "Enzyme"
+TDARipsererJuMPExt = ["JuMP", "HiGHS"]
+
 [compat]
-ChainRulesCore = "1"
-Enzyme = "0.13"
-JuMP = "1"
-HiGHS = "1"
-DelayEmbeddings = "2"
 Aqua = "0.8"
+ChainRulesCore = "1"
 Compat = "^3.10, 4"
-DataStructures = "0.17, 0.18"
+DataStructures = "0.17, 0.18, 0.19"
+DelayEmbeddings = "2"
 Distances = "0.8, 0.9, 0.10"
 Documenter = "1"
+Enzyme = "0.13"
 Graphs = "1"
+HiGHS = "1"
 IterTools = "1"
+JuMP = "1"
 LinearAlgebra = "1"
 MLJBase = "1"
 MLJModelInterface = "^0.3.5, 0.4, 1"
 MiniQhull = "0.2, 0.3, 0.4"
-TDAPersistenceDiagrams = "0.1"
 ProgressMeter = "1"
 Random = "1"
 RecipesBase = "1"
@@ -44,18 +56,19 @@ SafeTestsets = "0.1"
 SparseArrays = "1"
 StaticArrays = "0.12, 1"
 Suppressor = "0.2"
+TDAPersistenceDiagrams = "0.1"
 Test = "1"
 TupleTools = "1"
 julia = "1.6"
 
 [extras]
-ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
-JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
-HiGHS = "87dc4568-4c63-4d18-b0c0-bb2238e4078b"
-DelayEmbeddings = "5732040d-69e3-5649-938a-b6b4f237613f"
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+DelayEmbeddings = "5732040d-69e3-5649-938a-b6b4f237613f"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
+HiGHS = "87dc4568-4c63-4d18-b0c0-bb2238e4078b"
+JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
 MLJBase = "a7f614a8-145f-11e9-1d2a-a57a1082229d"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
@@ -64,16 +77,3 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Aqua", "Documenter", "MLJBase", "Random", "SafeTestsets", "Suppressor", "Test", "JuMP", "HiGHS", "DelayEmbeddings"]
-
-[weakdeps]
-ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
-JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
-HiGHS = "87dc4568-4c63-4d18-b0c0-bb2238e4078b"
-DelayEmbeddings = "5732040d-69e3-5649-938a-b6b4f237613f"
-
-[extensions]
-TDARipsererChainRulesCoreExt = "ChainRulesCore"
-TDARipsererEnzymeExt = "Enzyme"
-TDARipsererJuMPExt = ["JuMP", "HiGHS"]
-TDARipsererDelayEmbeddingsExt = "DelayEmbeddings"
