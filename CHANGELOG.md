@@ -2,6 +2,7 @@
 
 * Accept DataStructures 0.19 while retaining 0.17/0.18 for older supported stacks.
 * Resolve the unregistered persistence forks together in the optional AD CI environment.
+* Grant documentation deployment permission and explicitly request the Pages build.
 
 * Add differentiable finite Rips H0/H1 endpoints over F₂, topological losses,
   optional ChainRulesCore/Enzyme extensions, finite-difference tests and executed
