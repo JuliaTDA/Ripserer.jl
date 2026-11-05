@@ -1,6 +1,7 @@
 # TDARipserer v0.1.0 — 5 November 2026
 
 * Accept DataStructures 0.19 while retaining 0.17/0.18 for older supported stacks.
+* Resolve the unregistered persistence forks together in the optional AD CI environment.
 
 * Add differentiable finite Rips H0/H1 endpoints over F₂, topological losses,
   optional ChainRulesCore/Enzyme extensions, finite-difference tests and executed
