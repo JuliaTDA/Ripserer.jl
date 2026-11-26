@@ -5,7 +5,7 @@ function _unpack_kwargs(;
     field=Mod{modulus},
     verbose=false,
     alg=:cohomology,
-    reps=alg == :cohomology ? false : 1:dim_max,
+    reps=alg in (:homology, :involuted) ? (1:dim_max) : false,
     implicit=alg != :homology,
     # deprecated
     progress=nothing,
@@ -58,7 +58,8 @@ diagram, and the last is the (`dim_max`)-dimensional diagram.
 
 * `threshold`: compute persistent homology up to diameter smaller than threshold. Note that
   this parameter is passed to the filtration constructor. When using low thresholds with
-  Rips filtrations, consider setting `sparse=true` for optimal performance.
+    Rips filtrations, consider setting `sparse=true` or, for Euclidean point clouds,
+    `radius_graph=true` or `radius_graph=:auto`.
 
 * `cutoff`: only keep intervals with `persistence(interval) > cutoff`. Defaults to `0`. When
   `cutoff < 0`, the result will also contain zero-length intervals.
@@ -74,8 +75,29 @@ diagram, and the last is the (`dim_max`)-dimensional diagram.
 
 * `alg`: select the algorithm used in computation. The options are:
 
-  - `:cohomology`: Default and fastest algorithm. When `reps` is set, intervals are equipped
+  - `:cohomology`: Default algorithm. When `reps` is set, intervals are equipped
     with representative _co_cycles.
+
+  - `:parallel_cohomology`: Experimental implicit Rips cohomology over F₂.
+    Discover apparent pairs in H₂ and above across Julia threads before serial
+    pivot reduction. Requires a nonnegative cutoff and no representatives in
+    H₂ or above. Use `alg=:cohomology` for the default reduction.
+
+  - `:reduced_rips`: Exact `H₀` and `H₁` barcodes over F₂ for a vector of 2D or 3D
+    Euclidean points. Uses pointwise Float64 distances, which can differ from the
+    matrix-based Euclidean distances by rounding. Supports nonnegative cutoffs,
+    explicit thresholds, and birth/death simplices. Use with `reps=false` and
+    `dim_max=0` or `dim_max=1`. See [Koyama et al.](https://arxiv.org/abs/2307.16333).
+
+  - `:redzed`: RedZeD for dense, unweighted Rips filtrations over F₂. Uses
+    Float64 grades with birth and death simplices. Requires finite positive
+    off-diagonal distances and a nonnegative cutoff. See
+    [Kapulkin and Kershaw (2026)](https://arxiv.org/abs/2606.06310).
+
+  - `:cubical_union_find`: Fast vertex lower-star cubical barcodes on 2D and 3D
+    arrays over F₂. Uses primal and dual union-find, with cohomology for
+    3D H₁, representatives, and zero-persistence pairs. See
+    [Le Breton et al. (2026)](https://arxiv.org/abs/2606.04801).
 
   - `:homology`: Significantly slower than `:cohomology`, but finds representative
     cycles. Does not find infinite intervals beyond dimension 0.
@@ -117,6 +139,9 @@ julia> ripserer(Rips(X; threshold=1); alg=:involuted)
 """
 function ripserer(F::Type, args...; kwargs...)
     ripserer_kwargs, filtration_kwargs = _unpack_kwargs(; kwargs...)
+    if ripserer_kwargs.alg === :reduced_rips
+        return _reduced_rips(F, args...; ripserer_kwargs..., filtration_kwargs...)
+    end
     start_time = time_ns()
     filtration = F(args...; verbose=ripserer_kwargs.verbose, filtration_kwargs...)
     return _ripserer(filtration, start_time; ripserer_kwargs...)
@@ -127,6 +152,9 @@ ripserer(dist; kwargs...) = ripserer(Rips, dist; kwargs...)
 
 function ripserer(filtration::AbstractFiltration; kwargs...)
     ripserer_kwargs, other_kwargs = _unpack_kwargs(; kwargs...)
+    if ripserer_kwargs.alg === :reduced_rips
+        throw(ArgumentError("reduced Rips requires Euclidean point coordinates"))
+    end
     start_time = time_ns()
     return _ripserer(filtration, start_time; ripserer_kwargs..., other_kwargs...)
 end
@@ -148,7 +176,11 @@ function _ripserer(
     if field <: Union{Signed,Unsigned,AbstractFloat}
         error("$field is not a field! Please try a differnet field type")
     end
-    index_overflow_check(filtration, field, dim_max)
+    if alg === :redzed && filtration isa Rips
+        nv(filtration) >= 2 && index_overflow_check(filtration, field, min(dim_max, nv(filtration) - 2))
+    else
+        index_overflow_check(filtration, field, dim_max)
+    end
     result = _ripserer(
         Val(alg), filtration, cutoff, verbose, field, dim_max, reps, implicit
     )
@@ -161,6 +193,23 @@ end
 function _ripserer(
     ::Val{:cohomology}, filtration, cutoff, verbose, field, dim_max, reps, implicit
 )
+    return _cohomology(filtration, cutoff, verbose, field, dim_max, reps, implicit, false)
+end
+
+function _ripserer(
+    ::Val{:parallel_cohomology}, filtration::AbstractFiltration, cutoff, verbose,
+    field, dim_max, reps, implicit,
+)
+    filtration isa Union{Rips,EdgeCollapsedRips} ||
+        throw(ArgumentError("parallel cohomology requires Rips or EdgeCollapsedRips"))
+    field === Mod{2} && implicit && cutoff >= 0 ||
+        throw(ArgumentError("parallel cohomology requires implicit F₂ reduction and cutoff ≥ 0"))
+    any(d -> _reps(reps, d), 2:dim_max) &&
+        throw(ArgumentError("parallel cohomology does not support H₂ or higher representatives"))
+    return _cohomology(filtration, cutoff, verbose, field, dim_max, reps, implicit, true)
+end
+
+function _cohomology(filtration, cutoff, verbose, field, dim_max, reps, implicit, parallel)
     result = PersistenceDiagram[]
     zeroth, to_reduce, to_skip = zeroth_intervals(
         filtration, cutoff, verbose, field, _reps(reps, 0)
@@ -169,7 +218,9 @@ function _ripserer(
     if dim_max > 0
         matrix = CoboundaryMatrix{implicit}(field, filtration, to_reduce, to_skip)
         for dim in 1:dim_max
-            push!(result, compute_intervals!(matrix, cutoff, verbose, _reps(reps, dim)))
+            diagram = compute_intervals!(matrix, cutoff, verbose, _reps(reps, dim);
+                parallel_apparent=parallel && dim >= 2)
+            push!(result, diagram)
             if dim < dim_max
                 matrix = next_matrix(matrix, verbose)
             end

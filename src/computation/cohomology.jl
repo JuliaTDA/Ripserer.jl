@@ -338,12 +338,56 @@ function handle_apparent_pairs!(::Val, ::Val, matrix, _, _, _, _)
     return matrix.columns_to_reduce
 end
 
+# In a Rips filtration the first equal-grade cofacet is the oldest cofacet.
+# It forms an apparent pair exactly when the input is its youngest facet.
+function _apparent_cofacet(filtration, column)
+    for cofacet in coboundary(filtration, column)
+        birth(cofacet) == birth(column) || continue
+        for facet in boundary(filtration, cofacet)
+            isless(column, facet) && return nothing
+            column == facet && return cofacet
+        end
+        return cofacet
+    end
+    return nothing
+end
+
+function _discover_apparent_pairs(filtration, columns::Vector{S}) where {S}
+    C = simplex_type(filtration, dim(S) + 1)
+    matches = Vector{Union{Nothing,C}}(undef, length(columns))
+    Threads.@threads for i in eachindex(columns)
+        matches[i] = _apparent_cofacet(filtration, columns[i])
+    end
+    return matches
+end
+
+function _preclear_apparent_pairs!(matrix)
+    columns = matrix.columns_to_reduce
+    matches = _discover_apparent_pairs(matrix.filtration, columns)
+    sizehint!(matrix.columns_to_skip, length(matrix.columns_to_skip) + count(!isnothing, matches))
+    pairs = zip(columns, matches)
+    apparent = [(column, cofacet) for (column, cofacet) in pairs if cofacet !== nothing]
+    bulk_insert!(matrix.reduced, apparent)
+
+    # Retain the paired columns as faces for assembly in the next dimension.
+    keep = 0
+    for i in eachindex(columns)
+        if matches[i] === nothing
+            keep += 1
+            columns[keep] = columns[i]
+        else
+            push!(matrix.columns_to_skip, columns[i])
+        end
+    end
+    return resize!(columns, keep)
+end
+
 """
     compute_intervals!(matrix, cutoff, verbose, reps)
 
 Compute all intervals by fully reducing `matrix`.
 """
-function compute_intervals!(matrix, cutoff, verbose, reps)
+function compute_intervals!(matrix, cutoff, verbose, reps; parallel_apparent=false)
     ###
     ### Set up output.
     ###
@@ -352,7 +396,11 @@ function compute_intervals!(matrix, cutoff, verbose, reps)
     ###
     ### Apparent pair stuff.
     ###
-    columns = handle_apparent_pairs!(matrix, intervals, cutoff, verbose, reps)
+    columns = if parallel_apparent
+        _preclear_apparent_pairs!(matrix)
+    else
+        handle_apparent_pairs!(matrix, intervals, cutoff, verbose, reps)
+    end
 
     ###
     ### Interval computation.

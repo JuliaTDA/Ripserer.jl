@@ -1,3 +1,17 @@
+# Unreleased
+
+* Add opt-in automatic radius-graph selection for large, sparse Euclidean clouds.
+* Prototype parallel apparent-pair discovery ahead of H₂/H₃ pivot reduction.
+* Reuse edge positions during backward collapse scans.
+* Preserve vertex birth times and the source threshold in edge collapse. Handle
+  graphs without edges and use edge-indexed storage. Respect finite thresholds
+  for vertices in dense and sparse Rips filtrations.
+* Add direct Euclidean radius-graph construction with `radius_graph=true`.
+* Add `alg=:reduced_rips` for exact Euclidean H₀/H₁ barcodes over F₂ using
+  streamed edges and lune reduction.
+* Add opt-in RedZeD and cubical union-find algorithms.
+* Track compatible cycle histories along zigzag intervals with `reps=true`.
+
 # TDARipserer v0.1.0 — 5 November 2026
 
 * Accept DataStructures 0.19 while retaining 0.17/0.18 for older supported stacks.

@@ -107,6 +107,10 @@ Only keep intervals with desired birth/death `cutoff`. Compute homology with coe
 `verbose` is set.
 """
 function zeroth_intervals(filtration, cutoff, verbose, ::Type{F}, reps) where {F}
+    return zeroth_intervals(filtration, cutoff, verbose, F, reps, sort!(edges(filtration)))
+end
+
+function zeroth_intervals(filtration, cutoff, verbose, ::Type{F}, reps, simplices) where {F}
     V = simplex_type(filtration, 0)
     CE = chain_element_type(V, F)
     dset = DisjointSetsWithBirth(vertices(filtration), births(filtration))
@@ -115,7 +119,6 @@ function zeroth_intervals(filtration, cutoff, verbose, ::Type{F}, reps) where {F
 
     to_skip = simplex_type(filtration, 1)[]
     to_reduce = simplex_type(filtration, 1)[]
-    simplices = sort!(edges(filtration))
     if verbose
         progbar = Progress(
             length(simplices) + nv(filtration); desc="Computing 0d intervals... "
@@ -141,7 +144,7 @@ function zeroth_intervals(filtration, cutoff, verbose, ::Type{F}, reps) where {F
     for v in vertices(filtration)
         if find_root!(dset, v) == v && !isnothing(simplex(filtration, Val(0), (v,)))
             int = interval(dset, filtration, v, nothing, cutoff, reps)
-            push!(intervals, int)
+            !isnothing(int) && push!(intervals, int)
         end
         verbose && next!(progbar; showvalues=((:n_intervals, length(intervals)),))
     end

@@ -19,6 +19,7 @@ using Distances
 using IterTools
 using Graphs
 using MiniQhull
+using NearestNeighbors: KDTree, inrange!, knn, nn
 using TDAPersistenceDiagrams
 using ProgressMeter
 using RecipesBase
@@ -54,6 +55,7 @@ export Mod,
     LazyWitness,
     ZigzagEvent,
     ZigzagPersistence,
+    ZigzagRepresentative,
     zigzag_persistence,
     zigzag_diagrams,
     VinePoint,
@@ -90,9 +92,13 @@ include("filtrations/custom.jl")
 include("filtrations/alpha.jl")
 include("filtrations/edgecollapse.jl")
 include("filtrations/witness.jl")
+include("computation/reduced_rips.jl")
 include("computation/binary_algebra.jl")
 include("computation/zigzag.jl")
 include("computation/vineyards.jl")
+include("vendor/RedZeD.jl")
+include("computation/redzed.jl")
+include("computation/cubical_union_find.jl")
 
 include("extra/cycles.jl")
 include("extra/circularcoordinates.jl")

@@ -54,7 +54,9 @@ include("zigzag_oracle.jl")
             event.operation == :add ? push!(active, event.simplex) : delete!(active, event.simplex)
             push!(snapshots, copy(active))
         end
-        diagrams = zigzag_persistence(events; dim_max=2, initial=collect(first(snapshots)))
+        opts = (; dim_max=2, initial=collect(first(snapshots)))
+        diagrams = zigzag_persistence(events; opts..., reps=true)
+        @test diagrams == zigzag_persistence(events; opts...)
         directions = [e.operation == :add for e in events]
         for dimension in 0:2
             spaces = [oracle_homology(c, dimension) for c in snapshots]
@@ -64,6 +66,35 @@ include("zigzag_oracle.jl")
                 expected = oracle_generalized_rank(spaces, maps, directions, a, b)
                 actual = count(x -> birth(x) <= a - 1 && death(x) > b - 1, diagrams[dimension + 1])
                 @test actual == expected
+            end
+
+            bases = [zeros(Bool, size(H.reps, 2), 0) for H in spaces]
+            for bar in diagrams[dimension + 1]
+                path = representative(bar)
+                @test path isa ZigzagRepresentative
+                @test firstindex(path) == birth(bar)
+                @test lastindex(path) == (isfinite(bar) ? death(bar) - 1 : length(events))
+                coords = Dict{Int,Vector{Bool}}()
+                for t in firstindex(path):lastindex(path)
+                    H = spaces[t + 1]
+                    chain = path[t]
+                    @test all(s -> s in H.cells, chain)
+                    lower = [s for s in snapshots[t + 1] if length(s) == dimension]
+                    boundary = oracle_boundary(lower, H.cells)
+                    vector = [s in chain for s in H.cells]
+                    @test all(iseven, Int.(boundary) * vector)
+                    coords[t] = oracle_coordinates(H.span, vector)[(H.nb + 1):end]
+                    bases[t + 1] = hcat(bases[t + 1], coords[t])
+                end
+                for (i, forward) in enumerate(directions)
+                    source, target = forward ? (i - 1, i) : (i, i - 1)
+                    haskey(coords, source) || continue
+                    expected = get(coords, target, falses(size(maps[i], 1)))
+                    @test isodd.(Int.(maps[i]) * coords[source]) == expected
+                end
+            end
+            for (B, H) in zip(bases, spaces)
+                @test oracle_rank(B) == size(B, 2) == size(H.reps, 2)
             end
         end
     end

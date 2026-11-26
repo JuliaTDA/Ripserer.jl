@@ -67,7 +67,8 @@ end
     ::Type{S}, rips::AbstractRipsFiltration{I,T}, vertices
 ) where {I,T,S<:Simplex}
     if dim(S) == 0
-        return S(vertices[1], births(rips)[vertices[1]])
+        vertex_birth = births(rips)[vertices[1]]
+        return vertex_birth <= threshold(rips) ? S(vertices[1], vertex_birth) : nothing
     else
         adj = adjacency_matrix(rips)
         n = length(vertices)
@@ -173,10 +174,21 @@ Threshold defaults to the radius of the input space. When using low `threshold`s
 using the `sparse=true` keyword argument. It will give the same result, but may be much
 faster.
 
+For Float32 and Float64 Euclidean point clouds (up to 16 dimensions) with an
+explicit finite nonnegative threshold, set `radius_graph=true` to build the sparse
+adjacency directly using a KD-tree.
+Edge weights are evaluated point by point and tested against the inclusive
+threshold. Floating-point weights can differ from the matrix-based computation,
+including when choosing a threshold from a previously computed distance matrix.
+Set `radius_graph=:auto` to sample neighbour counts and use the KD-tree path
+for sufficiently large, sparse clouds. `radius_graph=false` always uses the
+pairwise path and is the default. If indexing is unavailable, the explicit
+`true` mode uses the pairwise sparse path and `:auto` follows `sparse`.
+
 # Constructors
 
 * `Rips(distance_matrix; threshold=nothing)`
-* `Rips(points; metric=Euclidean(1e-12), threshold=nothing)`
+* `Rips(points; metric=Euclidean(1e-12), threshold=nothing, radius_graph=false)`
 * `Rips{I}(args...)`: `I` sets the size of integer used to represent simplices.
 
 # Examples
@@ -219,17 +231,91 @@ function Rips{I}(
     if issparse(adj)
         adj isa SparseMatrixCSC ||
             throw(ArgumentError("only SparseMatrixCSC sparse matrices supported"))
-        SparseArrays.fkeep!(adj, (_, _, v) -> v ≤ thresh)
+        SparseArrays.fkeep!(adj, (i, j, v) -> i == j || v ≤ thresh)
     end
     return Rips{I,T,typeof(adj)}(adj, thresh)
 end
-function Rips{I}(points::AbstractVector; metric=Euclidean(1e-12), kwargs...) where {I}
+function Rips{I}(
+    points::AbstractVector; metric=Euclidean(1e-12), threshold=nothing, sparse=false,
+    radius_graph::Union{Bool,Symbol}=false, kwargs...
+) where {I}
     if !allunique(points)
         @warn "points not unique"
         points = unique(points)
     end
-    return Rips{I}(distances(points, metric); kwargs...)
+    radius_graph in (false, true, :auto) ||
+        throw(ArgumentError("radius_graph must be false, true, or :auto"))
+    index_candidate = radius_graph === true || (radius_graph === :auto && length(points) >= 512)
+    if index_candidate && metric isa Euclidean && !isnothing(threshold) &&
+        isfinite(threshold) && threshold >= 0
+        X = to_matrix(points)
+        T = eltype(X)
+        d, n = size(X)
+        if T <: Union{Float32,Float64} && 0 < d <= 16
+            radius = T(threshold)
+            # Keep both the tree's squared bounds and pointwise evaluation in range.
+            bound = sqrt(floatmax(T) / (8 * d))
+            if radius <= bound && (iszero(radius) || radius >= sqrt(floatmin(T))) &&
+                all(x -> abs(x) <= bound, X) &&
+                (radius_graph === true || d <= 8 || n >= 2048)
+                tree = KDTree(X)
+                search_radius = _radius_search_bound(radius, d)
+                if radius_graph === true || _sparse_radius_sample(tree, X, search_radius)
+                    adj = _radius_adjacency(tree, X, metric, radius, search_radius)
+                    return Rips{I}(adj; threshold=radius, kwargs...)
+                end
+            end
+        end
+        return Rips{I}(pairwise(metric, X; dims=2); threshold,
+            sparse=sparse || radius_graph === true, kwargs...)
+    end
+    return Rips{I}(distances(points, metric); threshold,
+        sparse=sparse || radius_graph === true, kwargs...)
 end
+
+function _sparse_radius_sample(tree, X, radius)
+    d, n = size(X)
+    samples = 32
+    max_density = d <= 4 ? 0.04 : 0.01
+    budget = samples * (n - 1) * max_density
+    neighbors = Int[]
+    found = 0
+    for k in 0:(samples - 1)
+        i = 1 + (k * n) ÷ samples
+        empty!(neighbors)
+        inrange!(neighbors, tree, view(X, :, i), radius)
+        found += length(neighbors) - 1
+        found > budget && return false
+    end
+    return true
+end
+
+function _radius_adjacency(tree, X::Matrix{T}, metric, radius::T, search_radius) where {T}
+    rows, cols, weights = Int[], Int[], T[]
+    neighbors = Int[]
+    for i in axes(X, 2)
+        p = view(X, :, i)
+        empty!(neighbors)
+        inrange!(neighbors, tree, p, search_radius)
+        for j in neighbors
+            j > i || continue
+            d = evaluate(metric, p, view(X, :, j))
+            d <= radius || continue
+            iszero(d) && throw(ArgumentError("zero edges in input matrix"))
+            push!(rows, i, j)
+            push!(cols, j, i)
+            push!(weights, d, d)
+        end
+    end
+    return sparse(rows, cols, weights, size(X, 2), size(X, 2))
+end
+
+# Pad the tree's squared-distance bound for rounding and underflow. Callers
+# filter the candidate points using the original threshold.
+function _radius_search_bound(radius::T, dimension) where {T}
+    return nextfloat(max(radius, sqrt(floatmin(T))) * (1 + 4 * dimension * eps(T)))
+end
+
 function Rips(dist_or_points; kwargs...)
     return Rips{Int}(dist_or_points; kwargs...)
 end

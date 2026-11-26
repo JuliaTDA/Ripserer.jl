@@ -23,6 +23,9 @@ end
 @safetestset "zerodimensional" begin
     include("computation/zerodimensional.jl")
 end
+@safetestset "reduced Rips" begin
+    include("computation/reduced_rips.jl")
+end
 @safetestset "zigzag" begin
     include("computation/zigzag.jl")
 end
@@ -44,6 +47,9 @@ end
 end
 @safetestset "edgecollapse" begin
     include("filtrations/edgecollapse.jl")
+end
+@safetestset "fast backends" begin
+    include("computation/fast_backends.jl")
 end
 @safetestset "witness" begin
     include("filtrations/witness.jl")

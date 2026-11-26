@@ -1,6 +1,26 @@
 struct LazyFalses end
 Base.getindex(::LazyFalses, i, j) = false
 
+mutable struct _EdgeMarks
+    positions::Dict{Tuple{Int,Int},Int}
+    marks::Vector{Int}
+    generation::Int
+end
+
+_EdgeMarks(positions) = _EdgeMarks(positions, zeros(Int, length(positions)), 1)
+_reset!(marks::_EdgeMarks) = (marks.generation += 1)
+
+function Base.getindex(marks::_EdgeMarks, u, v)
+    i = get(marks.positions, minmax(u, v), 0)
+    return i != 0 && marks.marks[i] == marks.generation
+end
+
+function _mark!(marks::_EdgeMarks, u, v)
+    u == v && return
+    marks.marks[marks.positions[minmax(u, v)]] = marks.generation
+    return nothing
+end
+
 function _get_edge_neighbors!(buffer, graph::AbstractGraph, edge, removed=LazyFalses())
     s, d = src(edge), dst(edge)
     nu = neighbors(graph, s)
@@ -30,7 +50,7 @@ function _get_adjacent_edges!(adjacent, graph::AbstractGraph, edge, removed=Lazy
     for u in (src(edge), dst(edge))
         for v in neighbors(graph, u)
             if !removed[v, u]
-                adjacent[u, v] = adjacent[v, u] = true
+                _mark!(adjacent, u, v)
             end
         end
     end
@@ -64,65 +84,67 @@ function _not_dominated(buffer, graph::AbstractGraph, edge, removed=LazyFalses()
     return true
 end
 
-function _add_core_edge!(core_edges, edge, val)
-    s, d = src(edge), dst(edge)
-    return core_edges[s, d] = core_edges[d, s] = val
-end
-
-function _remove_edge!(removed, edge)
-    s, d = src(edge), dst(edge)
-    return removed[s, d] = removed[d, s] = true
-end
-
-function _in(edgeset, edge::Edge)
-    return edgeset[src(edge), dst(edge)]
-end
-
 function _core_graph(filtration::Rips{<:Any,T}; verbose=false) where {T}
-    filtration_edges = Tuple{Edge{Int},T}[]
-    for e in sort!(edges(filtration))
-        v, u = vertices(e)
-        push!(filtration_edges, (Edge{Int}(u, v), birth(e)))
-    end
+    simplices = sort!(edges(filtration))
+    endpoints = [minmax(Int.(vertices(e))...) for e in simplices]
+    positions = Dict(pair => i for (i, pair) in enumerate(endpoints))
 
     buffer = Int[]
-    removed = fill(false, nv(filtration), nv(filtration))
-    core = zeros(T, nv(filtration), nv(filtration))
-    adjacent = fill(false, nv(filtration), nv(filtration))
+    removed = _EdgeMarks(positions)
+    adjacent = _EdgeMarks(positions)
+    retained = falses(length(simplices))
+    weights = Vector{T}(undef, length(simplices))
     graph = Graph(nv(filtration))
     # Add self loops so i ∈ neighbors(graph, i)
     for i in 1:nv(filtration)
         add_edge!(graph, i, i)
     end
 
-    prev_time = filtration_edges[1][2]
     if verbose
-        progbar = Progress(length(filtration_edges); desc="Collapsing edges...")
+        progbar = Progress(length(simplices); desc="Collapsing edges...")
     end
-    for (i, (curr_edge, curr_time)) in enumerate(filtration_edges)
+    for (i, (u, v)) in enumerate(endpoints)
+        curr_edge = Edge(u, v)
+        curr_time = birth(simplices[i])
         add_edge!(graph, curr_edge)
         if _not_dominated(buffer, graph, curr_edge)
-            _add_core_edge!(core, curr_edge, curr_time)
+            retained[i] = true
+            weights[i] = curr_time
 
-            adjacent .= false
-            removed .= false
+            _reset!(adjacent)
+            _reset!(removed)
             _get_adjacent_edges!(adjacent, graph, curr_edge)
             # Some edges that were not dominated before may be dominated now.
             for j in (i - 1):-1:1
-                edge, _ = filtration_edges[j]
-                if iszero(core[src(edge), dst(edge)])
-                    if _in(adjacent, edge) && _not_dominated(buffer, graph, edge, removed)
-                        _add_core_edge!(core, edge, curr_time)
-                        _get_adjacent_edges!(adjacent, graph, edge, removed)
-                    else
-                        _remove_edge!(removed, edge)
-                    end
+                retained[j] && continue
+                edge = Edge(endpoints[j]...)
+                if adjacent.marks[j] == adjacent.generation &&
+                        _not_dominated(buffer, graph, edge, removed)
+                    retained[j] = true
+                    weights[j] = curr_time
+                    _get_adjacent_edges!(adjacent, graph, edge, removed)
+                else
+                    removed.marks[j] = removed.generation
                 end
             end
         end
         verbose && next!(progbar)
     end
-    return sparse(core)
+    rows, cols, values = Int[], Int[], T[]
+    for i in eachindex(retained)
+        retained[i] || continue
+        u, v = endpoints[i]
+        push!(rows, u, v)
+        push!(cols, v, u)
+        push!(values, weights[i], weights[i])
+    end
+    for (v, value) in enumerate(births(filtration))
+        iszero(value) && continue
+        push!(rows, v)
+        push!(cols, v)
+        push!(values, value)
+    end
+    return sparse(rows, cols, values, nv(filtration), nv(filtration))
 end
 
 """
@@ -132,17 +154,16 @@ Perform a sequence of edge collapses on a filtration. This may significantly red
 computation time and does not change the result. The speedup is especially apparent with
 datasets that have a boundary, and with high-dimensional persistent homology computation.
 
-The drawback is that doing the collapses themselves can be time-consuming. The construction
-does not require a lot of memory (``\\mathcal{O}(n^2)`` for ``n`` vertices). This might
-still be a good choice for large inputs if you are willing to wait but don't have enough
-memory to compute persistent homology with `Rips`.
+Doing the collapses can be time-consuming. The construction uses storage linear in the
+number of vertices and edges of the input filtration.
 
 See the reference below for a description of the algorithm.
 
 # Constructors
 
-* `EdgeCollapsedRips(::AbstractRipsFiltration; verbose=false, threshold=nothing )`:
-  Collapse a given filtration. Setting `verbose` shows a progress bar.
+* `EdgeCollapsedRips(::Rips; verbose=false, threshold=nothing)`:
+  Collapse a given filtration, retaining its threshold by default. Setting `verbose` shows
+  a progress bar.
 
 * `EdgeCollapsedRips(::EdgeCollapsedRips; verbose=false, threshold=nothing)`: Allows
   changing `I` or `threshold` without recomputing.
@@ -195,14 +216,13 @@ struct EdgeCollapsedRips{I,T} <: AbstractRipsFiltration{I,T}
     threshold::T
 end
 
-function EdgeCollapsedRips(
-    rips::AbstractRipsFiltration{I,T}; verbose=false, threshold=nothing
-) where {I,T}
+function EdgeCollapsedRips(rips::Rips{I,T}; verbose=false, threshold=nothing) where {I,T}
     adj = _core_graph(rips; verbose=verbose)
-    if isnothing(threshold)
-        threshold = maximum(adj)
-    end
+    isnothing(threshold) && (threshold = rips.threshold)
     return EdgeCollapsedRips{I,T}(adj, T(threshold))
+end
+function EdgeCollapsedRips(rips::EdgeCollapsedRips{I}; verbose=false, threshold=rips.threshold) where {I}
+    return EdgeCollapsedRips{I}(rips; threshold=threshold)
 end
 function EdgeCollapsedRips{I}(dist_or_points; verbose=false, kwargs...) where {I}
     return EdgeCollapsedRips(Rips{I}(dist_or_points; kwargs...); verbose=verbose)

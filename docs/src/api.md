@@ -6,6 +6,29 @@
 ripserer
 ```
 
+For exact Euclidean barcodes through degree one, pass coordinates directly to
+`ripserer`:
+
+```julia
+points = [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]
+h0, h1 = ripserer(points; alg=:reduced_rips)
+h0, h1 = ripserer(points; alg=:reduced_rips, threshold=1.0)
+```
+
+The second call returns the square's loop with an infinite endpoint because the
+diagonals lie above the threshold. The backend uses Float64 pointwise distances,
+a KD-tree, and the relative neighborhood graph to bound the number of remaining
+pairs. The default threshold is the usual Rips radius computed with those
+pointwise distances. Finding the relative neighborhood graph at that default
+scale can still require a quadratic pair scan. The backend returns birth and
+death simplices and supports `dim_max=0` or `1`, modulus 2, and `reps=false`.
+
+For a tight explicit threshold, `ripserer(points; threshold=1.0, radius_graph=true)`
+uses the standard cohomology backend with a sparse Euclidean radius graph built
+directly from the coordinates. This also supports higher degrees and
+representatives. See [the benchmark script](https://github.com/JuliaTDA/Ripserer.jl/blob/master/benchmark/reduced_rips.jl)
+for a comparison with the existing Rips paths.
+
 ## Filtrations
 
 ```@docs

@@ -16,17 +16,50 @@ struct ZigzagEvent
 end
 ZigzagEvent(event::Pair) = ZigzagEvent(first(event), last(event))
 
+const _ZigzagChanges = Vector{Pair{Int,Vector{_SimplexKey}}}
+
+"""
+    ZigzagRepresentative
+
+An F₂ cycle along a zigzag bar, attached as `representative(interval)` when
+`reps=true`. Use `cycle[state_index]` to retrieve the simplices with nonzero
+coefficient at an observed state. `firstindex(cycle):lastindex(cycle)` is the
+inclusive range of available state indices. Across every arrow of the bar,
+the two cycles represent the same class after applying the inclusion.
+Only changes in the chain are stored.
+"""
+struct ZigzagRepresentative
+    first_state::Int
+    last_state::Int
+    changes::_ZigzagChanges
+end
+
+Base.firstindex(cycle::ZigzagRepresentative) = cycle.first_state
+Base.lastindex(cycle::ZigzagRepresentative) = cycle.last_state
+
+function _zz_chain_at(changes, t)
+    i = searchsortedlast(changes, t => nothing; by=first)
+    return iszero(i) ? _SimplexKey[] : last(changes[i])
+end
+
+function Base.getindex(cycle::ZigzagRepresentative, t::Integer)
+    firstindex(cycle) <= t <= lastindex(cycle) || throw(BoundsError(cycle, t))
+    return copy(_zz_chain_at(cycle.changes, t))
+end
+
 mutable struct _ZigzagSpace
     boundaries::Vector{BitSet}
     fillers::Vector{BitSet}
     cycles::Vector{BitSet}
     born::Vector{Int}
     basis::Union{Nothing,_BinaryBasis}
+    paths::Union{Nothing,Vector{_ZigzagChanges}}
 end
-_ZigzagSpace() = _ZigzagSpace(BitSet[], BitSet[], BitSet[], Int[], nothing)
+_ZigzagSpace(reps) = _ZigzagSpace(BitSet[], BitSet[], BitSet[], Int[], nothing,
+    reps ? _ZigzagChanges[] : nothing)
 
 """
-    ZigzagPersistence(; dim_max=1, initial=())
+    ZigzagPersistence(; dim_max=1, initial=(), reps=false)
 
 Online zigzag persistence over F2, with `push!(state, ZigzagEvent(...))`.
 Sparse cycle, boundary and filling-chain bases are retained between updates;
@@ -42,6 +75,8 @@ The fields `steps`, `column_additions`, and `max_active_simplices` expose
 reproducible work counters. Use [`zigzag_diagrams`](@ref) to inspect a stream
 without closing it. Working storage depends on the active complex and its
 cycle bases, not on the number of past boundary matrices.
+Set `reps=true` to retain compatible cycle histories for the reported bars.
+This mode retains chain changes from past events, including for completed bars.
 
 Reference: https://arxiv.org/abs/0812.0197 and Carlsson, de Silva and Morozov,
 *Zigzag persistent homology and real-valued functions* (SoCG 2009).
@@ -57,17 +92,56 @@ mutable struct ZigzagPersistence
     free_ids::Vector{Int}
     column_additions::Int
     max_active_simplices::Int
+    labels::Union{Nothing,Dict{Int,_SimplexKey}}
 end
 
 function _zz_space(state, d)
     while length(state.spaces) <= d
-        push!(state.spaces, _ZigzagSpace())
+        push!(state.spaces, _ZigzagSpace(!isnothing(state.labels) && length(state.spaces) <= state.dim_max))
     end
     return state.spaces[d + 1]
 end
 
-function _zz_close!(state, d, b, t)
-    d <= state.dim_max && b < t && push!(state.intervals[d + 1], PersistenceInterval(b, t))
+function _zz_bar(space, i, death, last_state; kwargs...)
+    b = space.born[i]
+    isnothing(space.paths) && return PersistenceInterval(b, death; kwargs...)
+    rep = ZigzagRepresentative(b, last_state, deepcopy(space.paths[i]))
+    return PersistenceInterval(b, death; representative=rep, kwargs...)
+end
+
+function _zz_close!(state, d, space, i, t)
+    if d <= state.dim_max && space.born[i] < t
+        push!(state.intervals[d + 1], _zz_bar(space, i, t, t - 1))
+    end
+    !isnothing(space.paths) && deleteat!(space.paths, i)
+    return nothing
+end
+
+function _zz_start_path!(state, space, t, chain; prepend=false)
+    isnothing(space.paths) && return
+    entry = _ZigzagChanges([t => sort!(_SimplexKey[state.labels[id] for id in chain])])
+    if prepend
+        pushfirst!(space.paths, entry)
+    else
+        push!(space.paths, entry)
+    end
+    return nothing
+end
+
+function _zz_add_path!(space, dest, src)
+    isnothing(space.paths) && return
+    a, b = space.paths[dest], space.paths[src]
+    start = space.born[dest]
+    times = sort!(union(first.(a), filter(>=(start), first.(b))))
+    changes = _ZigzagChanges()
+    for t in times
+        chain = sort!(symdiff(_zz_chain_at(a, t), _zz_chain_at(b, t)))
+        if isempty(changes) || chain != last(last(changes))
+            push!(changes, t => chain)
+        end
+    end
+    space.paths[dest] = changes
+    return nothing
 end
 
 function _zz_add!(state, vs, t)
@@ -83,6 +157,7 @@ function _zz_add!(state, vs, t)
         pop!(state.free_ids)
     end
     state.active[vs] = id
+    !isnothing(state.labels) && (state.labels[id] = vs)
     state.cofaces[id] = Set{Int}()
     for f in faces
         push!(state.cofaces[state.active[f]], id)
@@ -106,7 +181,10 @@ function _zz_add!(state, vs, t)
             # In a forward map, the last right-filtration summand participating
             # in the kernel dies; earlier summands retain their representatives.
             killed = maximum(homology)
-            _zz_close!(state, d - 1, lower.born[killed], t)
+            for i in homology
+                i == killed || _zz_add_path!(lower, killed, i)
+            end
+            _zz_close!(state, d - 1, lower, killed, t)
             deleteat!(lower.cycles, killed)
             deleteat!(lower.born, killed)
             push!(lower.boundaries, boundary)
@@ -122,6 +200,7 @@ function _zz_add!(state, vs, t)
     space = _zz_space(state, d)
     push!(space.cycles, new_cycle)
     push!(space.born, t)
+    _zz_start_path!(state, space, t, new_cycle)
     space.basis = nothing
 end
 
@@ -140,6 +219,7 @@ function _zz_remove!(state, vs, t)
         for i in eachindex(space.cycles)
             if i != killed && id in space.cycles[i]
                 symdiff!(space.cycles[i], pivot)
+                _zz_add_path!(space, i, killed)
                 state.column_additions += 1
             end
         end
@@ -155,7 +235,7 @@ function _zz_remove!(state, vs, t)
                 end
             end
         end
-        _zz_close!(state, d, space.born[killed], t)
+        _zz_close!(state, d, space, killed, t)
         deleteat!(space.cycles, killed)
         deleteat!(space.born, killed)
         space.basis = nothing
@@ -176,6 +256,7 @@ function _zz_remove!(state, vs, t)
         deleteat!(lower.boundaries, removed)
         pushfirst!(lower.cycles, cycle)
         pushfirst!(lower.born, t)
+        _zz_start_path!(state, lower, t, cycle; prepend=true)
         lower.basis = nothing
     end
     for f in _facets(vs)
@@ -183,16 +264,18 @@ function _zz_remove!(state, vs, t)
     end
     delete!(state.cofaces, id)
     delete!(state.active, vs)
+    !isnothing(state.labels) && delete!(state.labels, id)
     # All surviving representatives/fillers were cleared of this cell above.
     # Recycle chain coordinates so a long stream on a small complex does not
     # allocate ever-larger bitsets just because the event count grows.
     push!(state.free_ids, id)
 end
 
-function ZigzagPersistence(; dim_max=1, initial=())
+function ZigzagPersistence(; dim_max=1, initial=(), reps::Bool=false)
     dim_max isa Integer && dim_max >= 0 || throw(ArgumentError("dim_max must be a nonnegative integer"))
     state = ZigzagPersistence(Dict{_SimplexKey,Int}(), Dict{Int,Set{Int}}(),
-        _ZigzagSpace[], [PersistenceInterval[] for _ in 0:dim_max], dim_max, 0, 1, Int[], 0, 0)
+        _ZigzagSpace[], [PersistenceInterval[] for _ in 0:dim_max], dim_max, 0, 1, Int[], 0, 0,
+        reps ? Dict{Int,_SimplexKey}() : nothing)
     for vs in _simplex_closure(initial)
         _zz_add!(state, vs, 0)
     end
@@ -219,16 +302,21 @@ State zero is the initial complex; state j follows event j. A finite interval
 `[b,d)` is present at state indices b through d-1. Open intervals have death
 `Inf` and are right-censored by the stream end, rather than asserting eternal
 topological survival. Diagram metadata includes `kind=:zigzag` and `steps`.
-The returned intervals do not expose mutable internal representative bases.
+When tracking representatives, each returned interval includes a snapshot
+of its `ZigzagRepresentative`.
 """
 function zigzag_diagrams(state::ZigzagPersistence)
-    return [PersistenceDiagram(sort(vcat(state.intervals[d + 1],
-        [PersistenceInterval(b, Inf; right_censored=true) for b in _zz_space(state, d).born]));
-        dim=d, kind=:zigzag, steps=state.steps) for d in 0:state.dim_max]
+    return map(0:state.dim_max) do d
+        space = _zz_space(state, d)
+        closed = state.intervals[d + 1]
+        open = [_zz_bar(space, i, Inf, state.steps; right_censored=true) for i in eachindex(space.born)]
+        return PersistenceDiagram(sort!(vcat(isnothing(space.paths) ? closed : deepcopy(closed), open));
+            dim=d, kind=:zigzag, steps=state.steps)
+    end
 end
 
 """
-    zigzag_persistence(events; dim_max=1, initial=())
+    zigzag_persistence(events; dim_max=1, initial=(), reps=false)
 
 Compute zigzag PH over F2 from simplex insertions/deletions. Each element is
 a [`ZigzagEvent`](@ref) or `:add => vertices` / `:remove => vertices` pair.
@@ -239,8 +327,8 @@ events = [:add => (1,), :add => (2,), :add => (1, 2), :remove => (1, 2)]
 diagrams = zigzag_persistence(events; dim_max=0)
 ```
 """
-function zigzag_persistence(events; dim_max=1, initial=())
-    state = ZigzagPersistence(; dim_max=dim_max, initial=initial)
+function zigzag_persistence(events; dim_max=1, initial=(), reps::Bool=false)
+    state = ZigzagPersistence(; dim_max=dim_max, initial=initial, reps=reps)
     for event in events
         push!(state, event)
     end
